@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor - Hotel Encantos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f0; padding: 20px; }
+    header {
+      background: linear-gradient(135deg, #6b1a1a, #e74c3c);
+      color: white; padding: 15px 20px;
+      border-radius: 10px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 18px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab {
+      flex: 1; padding: 10px; text-align: center;
+      border-radius: 8px; cursor: pointer;
+      font-weight: bold; font-size: 12px;
+      border: 2px solid #ddd; background: white; color: #888;
+      min-width: 80px;
+    }
+    .tab.ativo { background: #6b1a1a; color: white; border-color: #6b1a1a; }
+    .cards-topo { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .resumo {
+      flex: 1; min-width: 100px; background: white; padding: 15px;
+      border-radius: 12px; box-shadow: 0 3px 15px rgba(0,0,0,0.1); text-align: center;
+    }
+    .resumo h3 { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .resumo span { font-size: 28px; font-weight: bold; }
+    .disponivel span { color: #1a6b3c; }
+    .ocupado span { color: #c0392b; }
+    .em-limpeza span { color: #e67e22; }
+    .limpeza-count span { color: #e67e22; }
+    .manut-count span { color: #8e44ad; }
+    .card {
+      background: white; padding: 20px; border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1); margin-bottom: 20px;
+    }
+    .card h2 { color: #6b1a1a; margin-bottom: 15px; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #6b1a1a; color: white; padding: 10px; text-align: left; font-size: 13px; }
+    td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+    tr:hover { background: #f5f5f5; }
+    .badge-live {
+      background: #e74c3c; color: white; font-size: 11px; padding: 3px 8px;
+      border-radius: 20px; margin-left: 8px; animation: pisca 1s infinite;
+    }
+    @keyframes pisca { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .badge-aberto { background: #f8d7da; color: #721c24; }
+    .badge-resolvido { background: #fff3cd; color: #856404; }
+    .badge-concluido { background: #d4edda; color: #155724; }
+    .badge-dano { background: #f8d7da; color: #721c24; }
+    button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; color: white; }
+    .btn-verde { background: #1a6b3c; }
+    .btn-azul { background: #2196F3; }
+    .btn-vermelho { background: #c0392b; }
+    input, select { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; }
+    .estoque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+    .estoque-card { background: #f9f9f9; border-radius: 10px; padding: 15px; border: 1px solid #eee; text-align: center; }
+    .estoque-card h4 { color: #6b1a1a; font-size: 13px; margin-bottom: 10px; }
+    .estoque-num { font-size: 28px; font-weight: bold; color: #1a6b3c; }
+    .estoque-sub { font-size: 11px; color: #888; margin-top: 4px; }
+    .estoque-edit { display: none; margin-top: 10px; }
+    a { color: white; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📊 Gestor <span class="badge-live">● LIVE</span></h1>
+  <a href="login.html">← Sair</a>
+</header>
+
+<div class="tabs">
+  <div class="tab ativo" onclick="mostrarAba('visao')">🏨 Visão Geral</div>
+  <div class="tab" onclick="mostrarAba('enxoval')">🛏️ Enxoval</div>
+  <div class="tab" onclick="mostrarAba('manutencao')">🔧 Manutenção</div>
+  <div class="tab" onclick="mostrarAba('limpezas')">🧹 Limpezas</div>
+  <div class="tab" onclick="mostrarAba('relatorio')">📅 Relatórios</div>
+  <div class="tab" onclick="mostrarAba('equipe')">👥 Equipe</div>
+</div>
+
+<!-- ABA VISÃO GERAL -->
+<div id="aba-visao">
+  <div class="cards-topo">
+    <div class="resumo disponivel"><h3>Disponíveis</h3><span id="count-disponivel">0</span></div>
+    <div class="resumo ocupado"><h3>Ocupados</h3><span id="count-ocupado">0</span></div>
+    <div class="resumo em-limpeza"><h3>Em Limpeza</h3><span id="count-em_limpeza" style="color:#e67e22">0</span></div>
+    <div class="resumo limpeza-count"><h3>Limpezas Hoje</h3><span id="count-limpeza">0</span></div>
+    <div class="resumo manut-count"><h3>Manutenções</h3><span id="count-manut">0</span></div>
+  </div>
+  <div class="card">
+    <h2>🚪 Status dos Apartamentos</h2>
+    <div id="mapa-quartos"><p style="color:#888;text-align:center">Carregando...</p></div>
+  </div>
+</div>
+
+<!-- ABA ENXOVAL -->
+<div id="aba-enxoval" style="display:none">
+  <div class="card">
+    <h2>🏠 Estoque da Rouparia</h2>
+    <div class="estoque-grid" id="estoque-grid"><p>Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>👕 Pendentes de Envio para Lavanderia</h2>
+    <div id="lavanderia-pendentes"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>🔄 Na Lavanderia Agora</h2>
+    <div id="lavanderia-andamento"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>📋 Histórico de Envios</h2>
+    <div id="lavanderia-historico"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>📋 Movimentações de Hoje</h2>
+    <table>
+      <thead><tr><th>Horário</th><th>Apto</th><th>Peça</th><th>Saiu</th><th>Entrou</th><th>Danos</th><th>Por</th><th>Ação</th></tr></thead>
+      <tbody id="lista-movimentacoes"><tr><td colspan="8" style="text-align:center">Carregando...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2>⚠️ Peças Danificadas</h2>
+    <div id="lista-danificados"><p style="color:#888;text-align:center">Nenhuma peça danificada pendente</p></div>
+  </div>
+</div>
+
+<!-- ABA MANUTENÇÃO -->
+<div id="aba-manutencao" style="display:none">
+  <div class="card">
+    <h2>🔧 Registro de Manutenções</h2>
+    <table>
+      <thead><tr><th>Apto</th><th>Problema</th><th>Registrado em</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="lista-manutencao"><tr><td colspan="5" style="text-align:center">Carregando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ABA LIMPEZAS -->
+<div id="aba-limpezas" style="display:none">
+  <div class="card">
+    <h2>⏱️ Em Limpeza Agora</h2>
+    <div id="andamento-grid"><p style="color:#888;text-align:center;padding:15px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>👤 Relatório por Camareira - Hoje</h2>
+    <div id="relatorio-camareira"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>🏷️ Tempo Médio por Categoria</h2>
+    <div id="relatorio-categoria"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>📋 Limpezas Concluídas Hoje</h2>
+    <div id="relatorio-detalhe"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>🧹 Registro Geral</h2>
+    <table>
+      <thead><tr><th>Horário</th><th>Ala</th><th>Tarefas</th></tr></thead>
+      <tbody id="lista-limpezas"><tr><td colspan="3" style="text-align:center">Carregando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ABA RELATÓRIO -->
+<div id="aba-relatorio" style="display:none">
+  <div class="card">
+    <h2>📅 Relatório por Data</h2>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px">
+      <input type="date" id="data-relatorio" style="flex:1;min-width:150px">
+      <button onclick="gerarRelatorio()" style="padding:12px 20px;background:#6b1a1a;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">🔍 Gerar Relatório</button>
+      <button onclick="imprimirRelatorio()" style="padding:12px 20px;background:#1a6b3c;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">🖨️ Imprimir</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btn-rel-geral" onclick="trocarRelatorio('geral')"
+        style="padding:10px 16px;background:#6b1a1a;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold">
+        📋 Geral
+      </button>
+      <button id="btn-rel-enxoval" onclick="trocarRelatorio('enxoval')"
+        style="padding:10px 16px;background:#ddd;color:#666;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold">
+        🛏️ Enxoval
+      </button>
+    </div>
+  </div>
+
+  <div id="conteudo-relatorio" style="display:none">
+    <div class="card"><h2>🧹 Limpezas do Dia</h2><div id="rel-limpezas-resumo"></div><br><h3 style="color:#6b1a1a;margin-bottom:10px;font-size:14px">Detalhes por apartamento:</h3><div id="rel-limpezas-detalhe"></div></div>
+    <div class="card"><h2>🔧 Manutenções do Dia</h2><div id="rel-manutencoes-conteudo"></div></div>
+    <div class="card"><h2>🏨 Check-ins e Check-outs do Dia</h2><div id="rel-checkins-conteudo"></div></div>
+  </div>
+
+  <div id="conteudo-enxoval" style="display:none">
+    <div class="card">
+      <h2>🛏️ Resumo de Enxoval do Dia</h2>
+      <div id="rel-enxoval-resumo"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+    <div class="card">
+      <h2>🚪 Detalhes por Apartamento</h2>
+      <div id="rel-enxoval-aptos"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+    <div class="card">
+      <h2>👕 Lavanderia do Dia</h2>
+      <div id="rel-enxoval-lavanderia"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+  </div>
+</div>
+
+    <!-- Filtro de tipo -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
+      <button id="btn-rel-geral" onclick="trocarRelatorio('geral')"
+        style="padding:10px 16px;background:#6b1a1a;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold">
+        📋 Geral
+      </button>
+      <button id="btn-rel-enxoval" onclick="trocarRelatorio('enxoval')"
+        style="padding:10px 16px;background:#ddd;color:#666;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold">
+        🛏️ Enxoval
+      </button>
+    </div>
+  </div>
+
+  <!-- Relatório Geral -->
+  <div id="conteudo-relatorio" style="display:none">
+    <div class="card"><h2>🧹 Limpezas do Dia</h2><div id="rel-limpezas-resumo"></div><br><h3 style="color:#6b1a1a;margin-bottom:10px;font-size:14px">Detalhes por apartamento:</h3><div id="rel-limpezas-detalhe"></div></div>
+    <div class="card"><h2>🔧 Manutenções do Dia</h2><div id="rel-manutencoes-conteudo"></div></div>
+    <div class="card"><h2>🏨 Check-ins e Check-outs do Dia</h2><div id="rel-checkins-conteudo"></div></div>
+  </div>
+
+  <!-- Relatório Enxoval -->
+  <div id="conteudo-enxoval" style="display:none">
+    <div class="card">
+      <h2>🛏️ Resumo de Enxoval do Dia</h2>
+      <div id="rel-enxoval-resumo"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+    <div class="card">
+      <h2>🚪 Detalhes por Apartamento</h2>
+      <div id="rel-enxoval-aptos"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+    <div class="card">
+      <h2>👕 Lavanderia do Dia</h2>
+      <div id="rel-enxoval-lavanderia"><p style="color:#888;text-align:center">Carregando...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ABA EQUIPE -->
+<div id="aba-equipe" style="display:none">
+  <div class="card">
+    <h2>👥 Cadastrar Nova Camareira</h2>
+    <input type="text" id="nome-nova" placeholder="Nome da camareira" style="width:100%;margin-bottom:8px">
+    <select id="cargo-nova" style="width:100%;margin-bottom:8px">
+      <option value="camareira">Camareira</option>
+      <option value="extra">Camareira Extra</option>
+    </select>
+    <button class="btn-verde" style="width:100%;padding:12px" onclick="adicionarCamareira()">➕ Adicionar</button>
+    <div style="display:none;background:#d4edda;color:#155724;padding:10px;border-radius:8px;margin-top:10px;text-align:center;font-weight:bold" id="msg-equipe">Camareira adicionada com sucesso!</div>
+  </div>
+    <div class="card">
+    <h2>👥 Equipe Ativa</h2>
+    <div id="lista-equipe-ativa">
+      <p style="color:#888;text-align:center;padding:10px">Carregando...</p>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+socket.on('update', () => carregarTudo());
+
+function formatarData(dt) {
+  if (!dt) return '-';
+  const d = new Date(dt);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toTimeString().slice(0,5);
+}
+
+async function carregarQuartos() {
+  const res = await fetch('/quartos');
+  const quartos = await res.json();
+  let disp = 0, ocup = 0, emLimpeza = 0;
+
+  quartos.forEach(q => {
+    if (q.status === 'disponivel') disp++;
+    else if (q.status === 'ocupado') ocup++;
+    else if (q.status === 'em_limpeza') emLimpeza++;
+  });
+
+  document.getElementById('count-disponivel').textContent = disp;
+  document.getElementById('count-ocupado').textContent = ocup;
+  document.getElementById('count-em_limpeza').textContent = emLimpeza;
+
+  const alas = ['Bloco A - Térreo','Bloco A - 1º Andar','Bloco B - Térreo','Bloco B - 1º Andar'];
+  const cores = {
+    disponivel:  { bg: '#d4edda', border: '#1a6b3c', text: '#155724', label: 'DISP' },
+    ocupado:     { bg: '#f8d7da', border: '#c0392b', text: '#721c24', label: 'OCUP' },
+    em_limpeza:  { bg: '#fff3cd', border: '#e67e22', text: '#856404', label: 'LIMP' },
+    interditado: { bg: '#f3e5f5', border: '#8e44ad', text: '#4a235a', label: 'INTER' }
+  };
+  const catAbrev = { 'Luxo':'LUX','Master':'MST','Premium-A':'PRE-A','Premium-B':'PRE-B' };
+
+  let html = '';
+  alas.forEach(ala => {
+    const quartosAla = quartos.filter(q => q.ala === ala);
+    if (!quartosAla.length) return;
+    html += `<div style="margin-bottom:20px">
+      <h3 style="color:#6b1a1a;font-size:14px;margin-bottom:10px;padding:6px 12px;
+        background:#f8f0f0;border-radius:8px;border-left:4px solid #6b1a1a">
+        📍 ${ala}
+      </h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px">`;
+    quartosAla.forEach(q => {
+      const cor = cores[q.status] || cores.disponivel;
+      const cat = catAbrev[q.categoria] || q.categoria;
+      html += `<div style="background:${cor.bg};border:2px solid ${cor.border};
+        border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;
+        transition:transform 0.1s"
+        onclick="verDetalheQuarto(${q.numero})"
+        onmouseover="this.style.transform='scale(1.05)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <div style="font-size:18px;font-weight:bold;color:${cor.text}">${String(q.numero).padStart(2,'0')}</div>
+        <div style="font-size:10px;color:${cor.text};margin-top:2px">${cat}</div>
+        <div style="font-size:10px;font-weight:bold;background:${cor.border};color:white;
+          border-radius:4px;padding:2px 4px;margin-top:4px">${cor.label}</div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #eee">
+    <span style="font-size:12px;color:#888">Legenda:</span>
+    <span style="background:#d4edda;border:1px solid #1a6b3c;padding:3px 8px;border-radius:6px;font-size:12px">✅ Disponível</span>
+    <span style="background:#f8d7da;border:1px solid #c0392b;padding:3px 8px;border-radius:6px;font-size:12px">🛏️ Ocupado</span>
+    <span style="background:#fff3cd;border:1px solid #e67e22;padding:3px 8px;border-radius:6px;font-size:12px">🧹 Em Limpeza</span>
+    <span style="background:#f3e5f5;border:1px solid #8e44ad;padding:3px 8px;border-radius:6px;font-size:12px">🔧 Interditado</span>
+  </div>`;
+
+  document.getElementById('mapa-quartos').innerHTML = html;
+}
+
+function verDetalheQuarto(numero) {
+  fetch('/quartos').then(r => r.json()).then(quartos => {
+    const q = quartos.find(x => x.numero === numero);
+    const detalhes = { disponivel:'Disponível', ocupado:'Ocupado', em_limpeza:'Em limpeza', interditado:'Interditado' };
+    if (q) alert(`Apto ${String(q.numero).padStart(2,'0')}\nAla: ${q.ala}\nCategoria: ${q.categoria}\nStatus: ${detalhes[q.status]||q.status}`);
+  });
+}
+
+async function carregarLimpezas() {
+  const res = await fetch('/limpezas');
+  const limpezas = await res.json();
+  document.getElementById('count-limpeza').textContent = limpezas.length;
+  const tbody = document.getElementById('lista-limpezas');
+  if (!limpezas.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center">Nenhuma limpeza registrada</td></tr>'; return; }
+  tbody.innerHTML = limpezas.slice(0,20).map(l => `<tr><td>${l.tempo}</td><td>${l.ala}</td><td>${l.tarefas}</td></tr>`).join('');
+}
+
+async function carregarManutencao() {
+  const res = await fetch('/manutencao');
+  const lista = await res.json();
+  document.getElementById('count-manut').textContent = lista.filter(m => m.status === 'aberto').length;
+  const tbody = document.getElementById('lista-manutencao');
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Nenhuma manutenção registrada</td></tr>'; return; }
+  tbody.innerHTML = lista.map(m => `<tr>
+    <td>Apto ${m.quarto_numero}</td>
+    <td>${m.observacao}</td>
+    <td>${formatarData(m.registrado_em)}</td>
+    <td><span class="badge badge-${m.status}">${m.status.toUpperCase()}</span></td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">
+      ${m.status==='aberto' ? `<button class="btn-azul" onclick="resolver(${m.id})">✅ Resolver</button>` : ''}
+      ${m.status==='resolvido' ? `<button class="btn-verde" onclick="vistoriar(${m.id})">🔍 Vistoriar</button>` : ''}
+      ${m.status==='concluido' ? `<span style="color:#1a6b3c;font-weight:bold">✅ Concluído</span>
+        ${m.resolvido_por ? `<br><small>Por: ${m.resolvido_por}</small>` : ''}` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+async function resolver(id) {
+  const nome = prompt('Seu nome (quem resolveu):');
+  if (!nome) return;
+  await fetch('/manutencao/resolver', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, resolvido_por:nome}) });
+  carregarManutencao();
+}
+
+async function vistoriar(id) {
+  const nome = prompt('Seu nome (quem vistoriou):');
+  if (!nome) return;
+  await fetch('/manutencao/vistoria', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, vistoriado_por:nome}) });
+  carregarManutencao();
+}
+
+async function carregarEstoque() {
+  const res = await fetch('/enxoval/estoque');
+  const estoque = await res.json();
+  const grid = document.getElementById('estoque-grid');
+  grid.innerHTML = estoque.map(e => `
+    <div class="estoque-card">
+      <h4>${e.peca}</h4>
+      <div class="estoque-num">${e.na_rouparia}</div>
+      <div class="estoque-sub">📦 Total: ${e.quantidade_total}</div>
+      <div class="estoque-sub" style="color:#e67e22">🛏️ Nos quartos: ${e.nos_quartos || 0}</div>
+      <div class="estoque-sub" style="color:#2196F3">👕 Lavanderia: ${e.na_lavanderia || 0}</div>
+      ${e.danificados > 0 ? `<div style="color:#c0392b;font-size:12px;margin-top:4px">⚠️ ${e.danificados} danificada(s)</div>` : ''}
+      <div class="estoque-edit" id="edit-${e.id}">
+        <input type="number" id="qtd-total-${e.id}" value="${e.quantidade_total}" placeholder="Total" style="width:80px;margin:4px">
+        <input type="number" id="qtd-rouparia-${e.id}" value="${e.na_rouparia}" placeholder="Rouparia" style="width:80px;margin:4px">
+        <button class="btn-verde" style="margin-top:6px;width:100%;padding:6px" onclick="salvarEstoque('${e.peca}', ${e.id})">💾 Salvar</button>
+      </div>
+      <button class="btn-azul" style="margin-top:8px;font-size:12px;padding:6px;width:100%" onclick="toggleEdit(${e.id})">✏️ Ajustar</button>
+    </div>
+  `).join('');
+}
+
+function toggleEdit(id) {
+  const div = document.getElementById(`edit-${id}`);
+  div.style.display = div.style.display === 'block' ? 'none' : 'block';
+}
+
+async function salvarEstoque(peca, id) {
+  const total = parseInt(document.getElementById(`qtd-total-${id}`).value);
+  const rouparia = parseInt(document.getElementById(`qtd-rouparia-${id}`).value);
+  await fetch('/enxoval/ajustar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({peca, quantidade_total:total, na_rouparia:rouparia}) });
+  toggleEdit(id);
+  carregarEstoque();
+}
+
+async function carregarMovimentacoes() {
+  const res = await fetch('/enxoval/movimentacoes');
+  const lista = await res.json();
+  const tbody = document.getElementById('lista-movimentacoes');
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">Nenhuma movimentação hoje</td></tr>'; return; }
+  tbody.innerHTML = lista.map(m => `<tr>
+    <td>${formatarData(m.timestamp)}</td>
+    <td>Apto ${m.quarto_numero}</td>
+    <td>${m.peca}</td>
+    <td>${m.quantidade_saiu}</td>
+    <td>${m.quantidade_entrou}</td>
+    <td>${m.danificados > 0 ? `<span class="badge badge-dano">⚠️ ${m.danificados}</span>` : '-'}</td>
+    <td>${m.registrado_por} (${m.perfil})</td>
+    <td><button class="btn-azul" style="font-size:12px;padding:5px 10px" onclick="editarMovimentacao(${m.id},${m.quantidade_saiu},${m.quantidade_entrou},${m.danificados})">✏️ Editar</button></td>
+  </tr>`).join('');
+}
+
+async function editarMovimentacao(id, saiu, entrou, danos) {
+  const novoSaiu = prompt('Quantidade que saiu:', saiu); if (novoSaiu === null) return;
+  const novoEntrou = prompt('Quantidade que entrou:', entrou); if (novoEntrou === null) return;
+  const novoDanos = prompt('Quantidade danificada:', danos); if (novoDanos === null) return;
+  const obs = prompt('Motivo da edição:'); if (obs === null) return;
+  await fetch('/enxoval/editar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, saiu:parseInt(novoSaiu), entrou:parseInt(novoEntrou), danificados:parseInt(novoDanos), obs}) });
+  carregarMovimentacoes();
+}
+
+async function carregarDanificados() {
+  const res = await fetch('/enxoval/danificados');
+  const lista = await res.json();
+  const div = document.getElementById('lista-danificados');
+  if (!lista.length) { div.innerHTML = '<p style="color:#888;text-align:center">Nenhuma peça danificada pendente</p>'; return; }
+  div.innerHTML = lista.map(d => `
+    <div style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #ffc107">
+      <strong>Apto ${d.quarto_numero} - ${d.peca}</strong><br>
+      <small>Qtd: ${d.danificados} | Por: ${d.registrado_por} em ${formatarData(d.timestamp)}</small><br>
+      ${d.observacao ? `<small>Descrição: ${d.observacao}</small><br>` : ''}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-vermelho" onclick="avaliarDano(${d.id},'${d.peca}',${d.danificados},'descartar')">🗑️ Descartar</button>
+        <button class="btn-verde" onclick="avaliarDano(${d.id},'${d.peca}',${d.danificados},'devolver')">♻️ Devolver ao Estoque</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function avaliarDano(id, peca, danificados, acao) {
+  const nome = prompt('Seu nome (gestor):'); if (!nome) return;
+  await fetch('/enxoval/avaliar-dano', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, peca, danificados, acao, avaliado_por:nome}) });
+  carregarDanificados(); carregarEstoque();
+}
+
+async function carregarLavanderia() {
+  const [resPend, resAnd, resHist] = await Promise.all([
+    fetch('/lavanderia/pendentes'),
+    fetch('/lavanderia/emandamento'),
+    fetch('/lavanderia/historico')
+  ]);
+  const pendentes = await resPend.json();
+  const emAndamento = await resAnd.json();
+  const historico = await resHist.json();
+
+  // Pendentes
+  const divPend = document.getElementById('lavanderia-pendentes');
+  if (!pendentes.length) {
+    divPend.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma peça pendente hoje</p>';
+  } else {
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Peça</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Quantidade</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd a Enviar</th>';
+    html += '</tr></thead><tbody>';
+    pendentes.forEach((p, i) => {
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${p.peca}</td>
+        <td style="padding:10px;font-size:13px">${p.total}</td>
+        <td style="padding:10px">
+          <input type="number" id="env-${i}" value="${p.total}" min="0" max="${p.total}"
+            style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"
+            data-peca="${p.peca}">
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<input type="text" id="enviado-por" placeholder="Seu nome (quem está enviando)"
+      style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ddd;font-size:14px">`;
+    html += `<button onclick="enviarLavanderia(${JSON.stringify(pendentes).replace(/"/g,'&quot;')})"
+      style="width:100%;padding:12px;background:#1a6b3c;color:white;border:none;border-radius:8px;
+      font-size:14px;font-weight:bold;cursor:pointer;margin-top:10px">
+      👕 Confirmar Envio para Lavanderia</button>`;
+    divPend.innerHTML = html;
+  }
+
+  // Em andamento
+  const divAnd = document.getElementById('lavanderia-andamento');
+  if (!emAndamento.length) {
+    divAnd.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nada na lavanderia agora</p>';
+  } else {
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Peça</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Enviado em</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Por</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd Voltou</th>';
+    html += '</tr></thead><tbody>';
+    emAndamento.forEach(e => {
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${e.peca}</td>
+        <td style="padding:10px;font-size:13px">${formatarData(e.enviado_em)}</td>
+        <td style="padding:10px;font-size:13px">${e.enviado_por}</td>
+        <td style="padding:10px;font-size:13px">${e.quantidade}</td>
+        <td style="padding:10px">
+          <input type="number" id="ret-${e.id}" min="0" max="${e.quantidade}" value="${e.quantidade}"
+            style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"
+            data-id="${e.id}" data-peca="${e.peca}">
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<div style="margin-top:15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="ret-por-geral" placeholder="Seu nome (quem conferiu)"
+        style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:14px">
+      <button onclick="confirmarRetornoTudo()"
+        style="padding:12px 20px;background:#1a6b3c;color:white;border:none;
+        border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">
+        ✅ Confirmar Retorno de Tudo
+      </button>
+    </div>`;
+    divAnd.innerHTML = html;
+  }
+
+  // Histórico
+  const divHist = document.getElementById('lavanderia-historico');
+  if (!historico.length) {
+    divHist.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhum histórico ainda</p>';
+  } else {
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Peça</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Enviado</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Retornou</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Status</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Data</th>';
+    html += '</tr></thead><tbody>';
+    historico.forEach(h => {
+      const badge = h.status==='retornado' ?
+        '<span style="background:#d4edda;color:#155724;padding:3px 8px;border-radius:10px;font-size:12px">✅ Retornado</span>' :
+        h.status==='retorno_parcial' ?
+        '<span style="background:#fff3cd;color:#856404;padding:3px 8px;border-radius:10px;font-size:12px">⚠️ Parcial</span>' :
+        '<span style="background:#cce5ff;color:#004085;padding:3px 8px;border-radius:10px;font-size:12px">👕 Na Lavanderia</span>';
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${h.peca}</td>
+        <td style="padding:10px;font-size:13px">${h.quantidade}</td>
+        <td style="padding:10px;font-size:13px">${h.quantidade_retornada || '-'}</td>
+        <td style="padding:10px">${badge}</td>
+        <td style="padding:10px;font-size:13px">${formatarData(h.enviado_em)}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    divHist.innerHTML = html;
+  }
+}
+
+async function enviarLavanderia(pendentes) {
+  const nome = document.getElementById('enviado-por').value;
+  if (!nome) { alert('Digite seu nome!'); return; }
+  const itens = pendentes.map((p,i) => ({ peca:p.peca, quantidade:parseInt(document.getElementById(`env-${i}`).value)||0 })).filter(i => i.quantidade > 0);
+  if (!itens.length) { alert('Informe pelo menos uma peça!'); return; }
+  const res = await fetch('/lavanderia/enviar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({itens, enviado_por:nome}) });
+  if (res.ok) { alert('✅ Enxoval enviado para a lavanderia!'); carregarLavanderia(); carregarEstoque(); }
+}
+
+async function confirmarRetornoTudo() {
+  const nome = document.getElementById('ret-por-geral').value;
+  if (!nome) { alert('Digite seu nome!'); return; }
+  const inputs = document.querySelectorAll('[data-id][data-peca]');
+  if (!inputs.length) { alert('Nenhum item para confirmar!'); return; }
+  if (!confirm('Confirmar retorno da lavanderia?')) return;
+
+  let pendentes = inputs.length;
+  let erros = 0;
+  inputs.forEach(async input => {
+    const id = input.getAttribute('data-id');
+    const peca = input.getAttribute('data-peca');
+    const qtd = parseInt(input.value) || 0;
+    if (qtd === 0) { pendentes--; return; }
+    const res = await fetch('/lavanderia/retorno', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:parseInt(id), peca, quantidade_retornada:qtd, retornado_por:nome}) });
+    if (!res.ok) erros++;
+    pendentes--;
+    if (pendentes === 0) {
+      alert(erros > 0 ? `⚠️ ${erros} item(s) com erro!` : '✅ Retorno confirmado!');
+      carregarLavanderia(); carregarEstoque();
+    }
+  });
+}
+
+async function carregarAndamento() {
+  const res = await fetch('/cronometro/andamento');
+  const lista = await res.json();
+  const div = document.getElementById('andamento-grid');
+  if (!div) return;
+  if (!lista.length) { div.innerHTML = '<p style="color:#888;text-align:center;padding:15px">Nenhuma limpeza em andamento agora</p>'; return; }
+  div.innerHTML = lista.map(l => `
+    <div style="background:#d4edda;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #1a6b3c">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>🚪 Apto ${l.quarto_numero}</strong>
+        <span style="background:#1a6b3c;color:white;padding:3px 10px;border-radius:20px;font-size:12px">⏱️ Em limpeza</span>
+      </div>
+      <div style="font-size:13px;color:#555;margin-top:5px">👤 ${l.camareira} • ${l.tipo_servico} • ${l.ala}</div>
+    </div>
+  `).join('');
+}
+
+async function carregarRelatorioCronometro() {
+  const [resPorCam, resPorCat, resRel] = await Promise.all([
+    fetch('/cronometro/por-camareira'),
+    fetch('/cronometro/por-categoria'),
+    fetch('/cronometro/relatorio')
+  ]);
+  const porCam = await resPorCam.json();
+  const porCat = await resPorCat.json();
+  const relatorio = await resRel.json();
+
+  const divCam = document.getElementById('relatorio-camareira');
+  if (divCam) {
+    if (!porCam.length) { divCam.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma limpeza concluída hoje</p>'; }
+    else {
+      divCam.innerHTML = `<table style="width:100%;border-collapse:collapse"><thead><tr>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Camareira</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Limpezas</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Média</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Menor</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Maior</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Total</th>
+      </tr></thead><tbody>
+      ${porCam.map(c => `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">👤 ${c.camareira}</td>
+        <td style="padding:10px;font-size:13px">${c.total_limpezas}</td>
+        <td style="padding:10px;font-size:13px">${c.media_minutos} min</td>
+        <td style="padding:10px;font-size:13px;color:#1a6b3c">${c.menor_tempo} min</td>
+        <td style="padding:10px;font-size:13px;color:#c0392b">${c.maior_tempo} min</td>
+        <td style="padding:10px;font-size:13px">${c.total_minutos} min</td>
+      </tr>`).join('')}
+      </tbody></table>`;
+    }
+  }
+
+  const divCat = document.getElementById('relatorio-categoria');
+  if (divCat) {
+    if (!porCat.length) { divCat.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhum dado ainda</p>'; }
+    else {
+      divCat.innerHTML = `<table style="width:100%;border-collapse:collapse"><thead><tr>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Categoria</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Total</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Média</th>
+      </tr></thead><tbody>
+      ${porCat.map(c => `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">${c.categoria}</td>
+        <td style="padding:10px;font-size:13px">${c.total_limpezas}</td>
+        <td style="padding:10px;font-size:13px">${c.media_minutos} min</td>
+      </tr>`).join('')}
+      </tbody></table>`;
+    }
+  }
+
+  const divRel = document.getElementById('relatorio-detalhe');
+  if (divRel) {
+    if (!relatorio.length) { divRel.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma limpeza concluída hoje</p>'; }
+    else {
+      divRel.innerHTML = `<table style="width:100%;border-collapse:collapse"><thead><tr>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Apto</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Camareira</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Tipo</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Início</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Limpeza</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Pausa</th>
+        <th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Total</th>
+      </tr></thead><tbody>
+      ${relatorio.map(r => {
+        const pausa = r.tempo_pausa_minutos || 0;
+        const total = (r.duracao_minutos || 0) + pausa;
+        return `<tr style="border-bottom:1px solid #eee">
+          <td style="padding:10px;font-size:13px">🚪 Apto ${r.quarto_numero}</td>
+          <td style="padding:10px;font-size:13px">👤 ${r.camareira}</td>
+          <td style="padding:10px;font-size:13px">${r.tipo_servico}</td>
+          <td style="padding:10px;font-size:13px">${new Date(r.inicio).toLocaleTimeString('pt-BR').slice(0,5)}</td>
+          <td style="padding:10px;font-size:13px;font-weight:bold;color:#1a6b3c">${r.duracao_minutos} min</td>
+          <td style="padding:10px;font-size:13px;color:${pausa > 0 ? '#e67e22' : '#888'}">${pausa > 0 ? pausa + ' min' : '-'}</td>
+          <td style="padding:10px;font-size:13px;font-weight:bold;color:#2196F3">${total} min</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table>`;
+    }
+  }
+}
+
+let tipoRelatorio = 'geral';
+
+function trocarRelatorio(tipo) {
+  tipoRelatorio = tipo;
+  document.getElementById('btn-rel-geral').style.background = tipo === 'geral' ? '#6b1a1a' : '#ddd';
+  document.getElementById('btn-rel-geral').style.color = tipo === 'geral' ? 'white' : '#666';
+  document.getElementById('btn-rel-enxoval').style.background = tipo === 'enxoval' ? '#6b1a1a' : '#ddd';
+  document.getElementById('btn-rel-enxoval').style.color = tipo === 'enxoval' ? 'white' : '#666';
+  document.getElementById('conteudo-relatorio').style.display = 'none';
+  document.getElementById('conteudo-enxoval').style.display = 'none';
+}
+
+async function gerarRelatorio() {
+  const data = document.getElementById('data-relatorio').value;
+  if (!data) { alert('Selecione uma data!'); return; }
+
+  if (tipoRelatorio === 'enxoval') {
+    await gerarRelatorioEnxoval(data);
+  } else {
+    await gerarRelatorioGeral(data);
+  }
+}
+
+async function gerarRelatorioGeral(data) {
+  const [resLimp, resLimpDet, resManut, resCheck] = await Promise.all([
+    fetch(`/relatorio/limpezas?data=${data}`),
+    fetch(`/relatorio/limpezas-detalhe?data=${data}`),
+    fetch(`/relatorio/manutencoes?data=${data}`),
+    fetch(`/relatorio/checkins?data=${data}`)
+  ]);
+  const limpezas = await resLimp.json();
+  const limpezasDet = await resLimpDet.json();
+  const manutencoes = await resManut.json();
+  const checkins = await resCheck.json();
+
+  document.getElementById('rel-limpezas-resumo').innerHTML = !limpezas.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhuma limpeza nesta data</p>' :
+    `<table style="width:100%;border-collapse:collapse"><thead><tr>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Camareira</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Limpezas</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Média</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Total</th>
+    </tr></thead><tbody>
+    ${limpezas.map(l => `<tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px;font-size:13px">👤 ${l.camareira}</td>
+      <td style="padding:10px;font-size:13px">${l.total_limpezas}</td>
+      <td style="padding:10px;font-size:13px">${l.media_minutos} min</td>
+      <td style="padding:10px;font-size:13px">${l.total_minutos} min</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+
+  document.getElementById('rel-limpezas-detalhe').innerHTML = !limpezasDet.length ? '' :
+    `<table style="width:100%;border-collapse:collapse"><thead><tr>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Apto</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Camareira</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Tipo</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Duração</th>
+    </tr></thead><tbody>
+    ${limpezasDet.map(l => `<tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px;font-size:13px">🚪 Apto ${l.quarto_numero}</td>
+      <td style="padding:10px;font-size:13px">👤 ${l.camareira}</td>
+      <td style="padding:10px;font-size:13px">${l.tipo_servico}</td>
+      <td style="padding:10px;font-size:13px;font-weight:bold;color:#1a6b3c">${l.duracao_minutos} min</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+
+  document.getElementById('rel-manutencoes-conteudo').innerHTML = !manutencoes.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhuma manutenção nesta data</p>' :
+    `<table style="width:100%;border-collapse:collapse"><thead><tr>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Apto</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Problema</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Status</th>
+    </tr></thead><tbody>
+    ${manutencoes.map(m => `<tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px;font-size:13px">🚪 Apto ${m.quarto_numero}</td>
+      <td style="padding:10px;font-size:13px">${m.observacao}</td>
+      <td style="padding:10px;font-size:13px">${m.status.toUpperCase()}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+
+  const chegadas = checkins.filter(c => c.checkin && c.checkin.startsWith(data));
+  const saidas = checkins.filter(c => c.checkout && c.checkout.startsWith(data));
+  document.getElementById('rel-checkins-conteudo').innerHTML = !checkins.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhum check-in ou check-out nesta data</p>' :
+    `<div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap">
+      <div style="background:#d4edda;padding:12px 20px;border-radius:8px;text-align:center;flex:1">
+        <div style="font-size:24px;font-weight:bold;color:#1a6b3c">${chegadas.length}</div>
+        <div style="font-size:13px;color:#155724">✅ Check-ins</div>
+      </div>
+      <div style="background:#f8d7da;padding:12px 20px;border-radius:8px;text-align:center;flex:1">
+        <div style="font-size:24px;font-weight:bold;color:#c0392b">${saidas.length}</div>
+        <div style="font-size:13px;color:#721c24">🚪 Check-outs</div>
+      </div>
+    </div>`;
+
+  document.getElementById('conteudo-relatorio').style.display = 'block';
+  document.getElementById('conteudo-enxoval').style.display = 'none';
+}
+
+async function gerarRelatorioEnxoval(data) {
+  const [resResumo, resAptos, resLav] = await Promise.all([
+    fetch(`/relatorio/enxoval-resumo?data=${data}`),
+    fetch(`/relatorio/enxoval-apartamentos?data=${data}`),
+    fetch(`/relatorio/enxoval-lavanderia?data=${data}`)
+  ]);
+  const resumo = await resResumo.json();
+  const aptos = await resAptos.json();
+  const lavanderia = await resLav.json();
+
+  // Resumo por peça
+  document.getElementById('rel-enxoval-resumo').innerHTML = !resumo.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhuma movimentação nesta data</p>' :
+    `<table style="width:100%;border-collapse:collapse"><thead><tr>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Peça</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Saiu Sujo</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Entrou Limpo</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Danificados</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Quartos</th>
+    </tr></thead><tbody>
+    ${resumo.map(r => `<tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px;font-size:13px">🧺 ${r.peca}</td>
+      <td style="padding:10px;font-size:13px;color:#c0392b">${r.total_saiu}</td>
+      <td style="padding:10px;font-size:13px;color:#1a6b3c">${r.total_entrou}</td>
+      <td style="padding:10px;font-size:13px;color:${r.total_danificados > 0 ? '#e67e22' : '#888'}">${r.total_danificados || 0}</td>
+      <td style="padding:10px;font-size:13px">${r.total_quartos} apto(s)</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+
+  // Por apartamento
+  const aptosAgrupados = {};
+  aptos.forEach(a => {
+    if (!aptosAgrupados[a.quarto_numero]) aptosAgrupados[a.quarto_numero] = { ala: a.ala, categoria: a.categoria, itens: [], registrado_por: a.registrado_por };
+    aptosAgrupados[a.quarto_numero].itens.push(a);
+  });
+
+  document.getElementById('rel-enxoval-aptos').innerHTML = !aptos.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhuma movimentação nesta data</p>' :
+    Object.entries(aptosAgrupados).map(([numero, dados]) => `
+      <div style="background:#f9f9f9;border-radius:10px;padding:15px;margin-bottom:10px;border:1px solid #eee">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="color:#6b1a1a">🚪 Apto ${numero} - ${dados.ala} (${dados.categoria})</strong>
+          <small style="color:#888">👤 ${dados.registrado_por}</small>
+        </div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="background:#eee;color:#555;padding:8px;text-align:left;font-size:12px">Peça</th>
+            <th style="background:#eee;color:#555;padding:8px;text-align:left;font-size:12px">Saiu</th>
+            <th style="background:#eee;color:#555;padding:8px;text-align:left;font-size:12px">Entrou</th>
+            <th style="background:#eee;color:#555;padding:8px;text-align:left;font-size:12px">Danos</th>
+          </tr></thead>
+          <tbody>
+            ${dados.itens.map(item => `<tr style="border-bottom:1px solid #eee">
+              <td style="padding:8px;font-size:12px">🧺 ${item.peca}</td>
+              <td style="padding:8px;font-size:12px;color:#c0392b">${item.quantidade_saiu}</td>
+              <td style="padding:8px;font-size:12px;color:#1a6b3c">${item.quantidade_entrou}</td>
+              <td style="padding:8px;font-size:12px;color:${item.danificados > 0 ? '#e67e22' : '#888'}">${item.danificados || 0}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `).join('');
+
+  // Lavanderia do dia
+  document.getElementById('rel-enxoval-lavanderia').innerHTML = !lavanderia.length ?
+    '<p style="color:#888;text-align:center;padding:10px">Nenhuma movimentação de lavanderia nesta data</p>' :
+    `<table style="width:100%;border-collapse:collapse"><thead><tr>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Peça</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Qtd Enviada</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Enviado por</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Qtd Retornou</th>
+      <th style="background:#6b1a1a;color:white;padding:10px;font-size:13px;text-align:left">Status</th>
+    </tr></thead><tbody>
+    ${lavanderia.map(l => {
+      const badge = l.status==='retornado' ?
+        '<span style="background:#d4edda;color:#155724;padding:3px 8px;border-radius:10px;font-size:12px">✅ Retornado</span>' :
+        l.status==='retorno_parcial' ?
+        '<span style="background:#fff3cd;color:#856404;padding:3px 8px;border-radius:10px;font-size:12px">⚠️ Parcial</span>' :
+        '<span style="background:#cce5ff;color:#004085;padding:3px 8px;border-radius:10px;font-size:12px">👕 Na Lavanderia</span>';
+      return `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${l.peca}</td>
+        <td style="padding:10px;font-size:13px">${l.quantidade}</td>
+        <td style="padding:10px;font-size:13px">${l.enviado_por}</td>
+        <td style="padding:10px;font-size:13px">${l.quantidade_retornada || '-'}</td>
+        <td style="padding:10px">${badge}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+
+  document.getElementById('conteudo-enxoval').style.display = 'block';
+  document.getElementById('conteudo-relatorio').style.display = 'none';
+}
+
+function imprimirRelatorio() {
+  window.print();
+}
+
+async function carregarEquipe() {
+  try {
+    const res = await fetch('/equipe');
+    const equipe = await res.json();
+    const div = document.getElementById('lista-equipe-ativa');
+    if (!equipe.length) { div.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma camareira cadastrada</p>'; return; }
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Nome</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Cargo</th>';
+    html += '<th style="background:#6b1a1a;color:white;padding:10px;text-align:left;font-size:13px">Ação</th>';
+    html += '</tr></thead><tbody>';
+    equipe.forEach(e => {
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">👤 ${e.nome}</td>
+        <td style="padding:10px;font-size:13px">
+          <span style="background:${e.cargo==='extra'?'#fff3cd':'#d4edda'};
+            color:${e.cargo==='extra'?'#856404':'#155724'};
+            padding:3px 8px;border-radius:10px;font-size:12px">
+            ${e.cargo === 'extra' ? '⭐ Extra' : '🧹 Camareira'}
+          </span>
+        </td>
+        <td style="padding:10px">
+          <button onclick="desativarCamareira(${e.id},'${e.nome}')"
+            style="padding:6px 12px;background:#c0392b;color:white;border:none;
+            border-radius:6px;cursor:pointer;font-size:12px">
+            🗑️ Remover
+          </button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    div.innerHTML = html;
+  } catch(e) { console.error('Erro equipe:', e); }
+}
+
+async function adicionarCamareira() {
+  const nome = document.getElementById('nome-nova').value.trim();
+  const cargo = document.getElementById('cargo-nova').value;
+  if (!nome) { alert('Digite o nome!'); return; }
+  const res = await fetch('/equipe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nome, cargo}) });
+  if (res.ok) {
+    const msg = document.getElementById('msg-equipe');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    document.getElementById('nome-nova').value = '';
+    carregarEquipe();
+  } else { alert('Erro! Verifique se o nome já está cadastrado.'); }
+}
+
+async function desativarCamareira(id, nome) {
+  if (!confirm(`Deseja remover ${nome} da equipe?`)) return;
+  const res = await fetch('/equipe/desativar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
+  if (res.ok) carregarEquipe();
+}
+
+function mostrarAba(aba) {
+  ['visao','enxoval','manutencao','limpezas','relatorio','equipe'].forEach((a, i) => {
+    document.getElementById(`aba-${a}`).style.display = a === aba ? 'block' : 'none';
+    document.querySelectorAll('.tab')[i].classList.toggle('ativo', a === aba);
+  });
+  if (aba === 'enxoval') { carregarEstoque(); carregarMovimentacoes(); carregarDanificados(); carregarLavanderia(); }
+  if (aba === 'manutencao') carregarManutencao();
+  if (aba === 'limpezas') { carregarLimpezas(); carregarAndamento(); carregarRelatorioCronometro(); }
+  if (aba === 'equipe') carregarEquipe();
+  if (aba === 'relatorio') {
+    const hoje = new Date().toISOString().slice(0,10);
+    document.getElementById('data-relatorio').value = hoje;
+  }
+}
+
+function carregarTudo() {
+  carregarQuartos();
+  carregarLimpezas();
+  carregarManutencao();
+  carregarAndamento();
+  carregarRelatorioCronometro();
+}
+
+carregarTudo();
+</script>
+</body>
+</html>

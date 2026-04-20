@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Encantos de Itaperapuã</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a6b3c, #2ecc71);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 320px;
+    }
+    h1 { color: #1a6b3c; font-size: 20px; margin-bottom: 5px; }
+    p { color: #888; font-size: 13px; margin-bottom: 25px; }
+    select, input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 15px;
+    }
+    button {
+      background: #1a6b3c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    button:hover { background: #2ecc71; }
+    .erro {
+      display: none;
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    #div-nome { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏨 Hotel Encantos de Itaperapuã</h1>
+    <p>Sistema de Governança</p>
+
+    <select id="perfil" onchange="mostrarNome()">
+      <option value="">Selecione seu perfil...</option>
+      <option value="camareira">Camareira</option>
+      <option value="governanta">Governanta</option>
+      <option value="recepcao">Recepção</option>
+      <option value="gestor">Gestor</option>
+    </select>
+
+    <div id="div-nome">
+      <select id="nome-camareira-login">
+        <option value="">Selecione seu nome...</option>
+      </select>
+    </div>
+
+    <input type="password" id="senha" placeholder="Digite sua senha">
+    <button onclick="entrar()">Entrar</button>
+    <div class="erro" id="erro">Senha incorreta! Tente novamente.</div>
+  </div>
+
+  <script>
+    const senhas = {
+      camareira: '1231',
+      governanta: '4512',
+      recepcao: '3222',
+      gestor: '8956'
+    };
+
+    // Carrega camareiras do banco
+    async function carregarCamareiras() {
+      try {
+        const res = await fetch('/equipe');
+        const equipe = await res.json();
+        const sel = document.getElementById('nome-camareira-login');
+        sel.innerHTML = '<option value="">Selecione seu nome...</option>';
+        equipe.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.nome;
+          opt.textContent = e.nome + (e.cargo === 'extra' ? ' (Extra)' : '');
+          sel.appendChild(opt);
+        });
+      } catch(err) {
+        console.error('Erro ao carregar equipe:', err);
+      }
+    }
+
+    function mostrarNome() {
+      const perfil = document.getElementById('perfil').value;
+      document.getElementById('div-nome').style.display = perfil === 'camareira' ? 'block' : 'none';
+    }
+
+    function entrar() {
+      const perfil = document.getElementById('perfil').value;
+      const senha = document.getElementById('senha').value;
+      const erro = document.getElementById('erro');
+
+      if (!perfil) { alert('Selecione um perfil!'); return; }
+
+      if (perfil === 'camareira') {
+        const nome = document.getElementById('nome-camareira-login').value;
+        if (!nome) { alert('Selecione seu nome!'); return; }
+        if (!senha) { alert('Digite a senha!'); return; }
+        if (senha === senhas[perfil]) {
+          localStorage.setItem('nomeCamareira', nome);
+          erro.style.display = 'none';
+          window.location.href = 'camareira.html';
+        } else {
+          erro.style.display = 'block';
+          document.getElementById('senha').value = '';
+        }
+        return;
+      }
+
+      if (!senha) { alert('Digite a senha!'); return; }
+
+      if (senha === senhas[perfil]) {
+        erro.style.display = 'none';
+        if (perfil === 'governanta') {
+          localStorage.setItem('nomeCamareira', 'Vanessa');
+          window.location.href = 'governanta.html';
+        } else {
+          window.location.href = perfil + '.html';
+        }
+      } else {
+        erro.style.display = 'block';
+        document.getElementById('senha').value = '';
+      }
+    }
+
+    document.getElementById('senha').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') entrar();
+    });
+
+    carregarCamareiras();
+  </script>
+</body>
+</html>

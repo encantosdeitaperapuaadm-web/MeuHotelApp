@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Governanta - Hotel Encantos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f0; padding: 20px; }
+    header {
+      background: linear-gradient(135deg, #6b4c1a, #e67e22);
+      color: white; padding: 15px 20px;
+      border-radius: 10px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 18px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab {
+      flex: 1; padding: 10px; text-align: center;
+      border-radius: 8px; cursor: pointer;
+      font-weight: bold; font-size: 12px;
+      border: 2px solid #ddd; background: white; color: #888;
+      min-width: 70px;
+    }
+    .tab.ativo { background: #6b4c1a; color: white; border-color: #6b4c1a; }
+    .card {
+      background: white; padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .card h2 { color: #6b4c1a; margin-bottom: 15px; font-size: 16px; }
+    select, input, textarea {
+      width: 100%; padding: 12px; margin: 8px 0;
+      border-radius: 8px; border: 1px solid #ddd; font-size: 15px;
+    }
+    button {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 8px;
+      font-size: 15px; font-weight: bold; cursor: pointer;
+      margin-top: 10px; color: white;
+    }
+    .btn-verde { background: #1a6b3c; }
+    .btn-laranja { background: #e67e22; }
+    .btn-azul { background: #2196F3; }
+    .btn-vermelho { background: #c0392b; }
+    .mensagem {
+      display: none; padding: 12px; border-radius: 8px;
+      margin-top: 10px; text-align: center; font-weight: bold;
+    }
+    .msg-verde { background: #d4edda; color: #155724; }
+    .msg-laranja { background: #fff3cd; color: #856404; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #6b4c1a; color: white; padding: 10px; text-align: left; font-size: 13px; }
+    td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+    tr:hover { background: #f5f5f5; }
+    .status-ocupado { color: #c0392b; font-weight: bold; }
+    .status-disponivel { color: #1a6b3c; font-weight: bold; }
+    .status-em_limpeza { color: #e67e22; font-weight: bold; }
+    .status-interditado { color: #8e44ad; font-weight: bold; }
+    .checklist { list-style: none; margin-top: 10px; }
+    .checklist li {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-bottom: 1px solid #eee;
+      font-size: 15px; cursor: pointer;
+    }
+    .checklist li input[type=checkbox] { width: 22px; height: 22px; margin: 0; }
+    .checklist li.feito { text-decoration: line-through; color: #aaa; }
+    .progresso { background: #eee; border-radius: 10px; height: 10px; margin: 10px 0; }
+    .progresso-bar { background: #e67e22; height: 10px; border-radius: 10px; transition: width 0.3s; }
+    .progresso-texto { font-size: 13px; color: #888; text-align: right; }
+    .cronometro-box {
+      background: linear-gradient(135deg, #6b4c1a, #e67e22);
+      border-radius: 12px; padding: 20px;
+      text-align: center; color: white; margin-bottom: 15px;
+    }
+    .cronometro-box h3 { font-size: 14px; margin-bottom: 10px; opacity: 0.9; }
+    .cronometro-tempo { font-size: 48px; font-weight: bold; letter-spacing: 4px; margin: 10px 0; }
+    .cronometro-info { font-size: 13px; opacity: 0.85; margin-bottom: 15px; }
+    .enxoval-item {
+      background: #f9f9f9; border-radius: 10px;
+      padding: 12px; border: 1px solid #eee; margin-bottom: 10px;
+    }
+    .enxoval-item h4 { color: #6b4c1a; font-size: 14px; margin-bottom: 8px; }
+    .enxoval-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+    .enxoval-label { font-size: 12px; color: #666; width: 100px; flex-shrink: 0; }
+    .enxoval-num { width: 80px; padding: 6px; margin: 0; text-align: center; font-size: 14px; border-radius: 6px; border: 1px solid #ddd; }
+    .dano-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer; }
+    .dano-check input { width: 18px; height: 18px; margin: 0; }
+    .dano-check span { font-size: 13px; color: #c0392b; font-weight: bold; }
+    .dano-obs { display: none; margin-top: 6px; }
+    .badge-live {
+      background: #c0392b; color: white; font-size: 11px; padding: 3px 8px;
+      border-radius: 20px; margin-left: 8px; animation: pisca 1s infinite;
+    }
+    @keyframes pisca { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    a { color: white; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>👑 Governanta <span class="badge-live">● LIVE</span></h1>
+  <a href="login.html">← Sair</a>
+</header>
+
+<div class="tabs">
+  <div class="tab ativo" onclick="mostrarAba('limpeza')">🧹 Limpeza</div>
+  <div class="tab" onclick="mostrarAba('quartos')">🚪 Quartos</div>
+  <div class="tab" onclick="mostrarAba('lavanderia')">👕 Lavanderia</div>
+  <div class="tab" onclick="mostrarAba('enxoval')">🛏️ Enxoval</div>
+  <div class="tab" onclick="mostrarAba('manutencao')">🔧 Manutenção</div>
+</div>
+
+<!-- ABA LIMPEZA -->
+<div id="aba-limpeza">
+  <div style="display:none" id="box-cronometro-ativo">
+    <div class="cronometro-box">
+      <h3>⏱️ Limpeza em andamento</h3>
+      <div class="cronometro-tempo" id="tempo-display">00:00</div>
+      <div class="cronometro-info" id="info-cronometro">Apto - Governanta</div>
+      <button style="background:rgba(255,255,255,0.2);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="finalizarCronometro()">⏹️ Finalizar</button>
+      <button id="btn-pausa" style="background:rgba(255,165,0,0.4);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="togglePausa()">⏸️ Pausar</button>
+      <button style="background:rgba(255,0,0,0.3);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="cancelarCronometro()">❌ Cancelar</button>
+    </div>
+  </div>
+
+  <div class="card" id="card-iniciar">
+    <h2>▶️ Iniciar Limpeza</h2>
+    <input type="text" id="nome-camareira" style="display:none" value="Vanessa">
+    <p style="color:#6b4c1a;font-weight:bold;padding:8px 0">👑 Olá, Vanessa!</p>
+    <select id="quarto-cron">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <select id="tipo-servico-cron">
+      <option value="limpeza">Limpeza</option>
+      <option value="saida">Limpeza de Saída</option>
+    </select>
+    <button class="btn-laranja" onclick="iniciarCronometro()">▶️ Iniciar Limpeza</button>
+    <div class="mensagem msg-laranja" id="msg-cron"></div>
+  </div>
+
+  <div class="card" id="card-checklist" style="display:none">
+    <h2 id="titulo-checklist">Checklist</h2>
+    <div class="progresso">
+      <div class="progresso-bar" id="barra" style="width:0%"></div>
+    </div>
+    <div class="progresso-texto" id="texto-progresso">0 de 0 tarefas</div>
+    <ul class="checklist" id="checklist"></ul>
+    <div class="mensagem msg-verde" id="msg-limpeza">Limpeza finalizada!</div>
+  </div>
+</div>
+
+<!-- ABA QUARTOS -->
+<div id="aba-quartos" style="display:none">
+  <div class="card">
+    <h2>🚪 Status dos Apartamentos</h2>
+    <div id="mapa-quartos"><p style="color:#888;text-align:center">Carregando...</p></div>
+  </div>
+</div>
+
+<!-- ABA LAVANDERIA -->
+<div id="aba-lavanderia" style="display:none">
+  <div class="card">
+    <h2>👕 Pendentes de Envio</h2>
+    <div id="lavanderia-pendentes"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>🔄 Na Lavanderia Agora</h2>
+    <div id="lavanderia-andamento"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+</div>
+
+<!-- ABA ENXOVAL -->
+<div id="aba-enxoval" style="display:none">
+  <div class="card">
+    <h2>🛏️ Registrar Troca de Enxoval</h2>
+    <select id="quarto-enx" onchange="atualizarEnxovalPadrao()">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <div id="enxoval-grid"></div>
+    <button class="btn-azul" onclick="registrarEnxoval()">🛏️ Registrar Enxoval</button>
+    <div class="mensagem msg-verde" id="msg-enxoval">Enxoval registrado!</div>
+  </div>
+</div>
+
+<!-- ABA MANUTENÇÃO -->
+<div id="aba-manutencao" style="display:none">
+  <div class="card">
+    <h2>🔧 Manutenções Abertas</h2>
+    <div id="lista-manutencao"><p style="color:#888;text-align:center;padding:10px">Carregando...</p></div>
+  </div>
+  <div class="card">
+    <h2>🔧 Registrar Manutenção</h2>
+    <select id="quarto-manut">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <textarea id="obs-manut" rows="4" placeholder="Descreva o problema..."></textarea>
+    <button class="btn-vermelho" onclick="registrarManutencao()">🔧 Registrar Problema</button>
+    <div class="mensagem msg-laranja" id="msg-manut">Manutenção registrada!</div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+socket.on('update', () => carregarQuartos());
+
+const pecas = [
+  'Lençol Casal','Lençol Solteiro','Fronha',
+  'Travesseiro','Cobertor','Toalha de Piso',
+  'Toalha de Rosto','Toalha de Banho'
+];
+
+const enxovalPadrao = {
+  'Luxo':      { 'Lençol Casal':1, 'Lençol Solteiro':1, 'Fronha':2, 'Travesseiro':2, 'Cobertor':1, 'Toalha de Piso':1, 'Toalha de Rosto':2, 'Toalha de Banho':2 },
+  'Master':    { 'Lençol Casal':1, 'Lençol Solteiro':2, 'Fronha':4, 'Travesseiro':4, 'Cobertor':1, 'Toalha de Piso':2, 'Toalha de Rosto':4, 'Toalha de Banho':4 },
+  'Premium-A': { 'Lençol Casal':1, 'Lençol Solteiro':2, 'Fronha':4, 'Travesseiro':4, 'Cobertor':1, 'Toalha de Piso':3, 'Toalha de Rosto':6, 'Toalha de Banho':6 },
+  'Premium-B': { 'Lençol Casal':1, 'Lençol Solteiro':1, 'Fronha':2, 'Travesseiro':2, 'Cobertor':1, 'Toalha de Piso':2, 'Toalha de Rosto':4, 'Toalha de Banho':4 }
+};
+
+const checklists = {
+  base: [
+    'Arrumar cama casal','Arrumar cama solteiro',
+    'Limpar banheiro','Limpar pia e espelho',
+    'Varrer o quarto','Passar pano no chão',
+    'Limpar ar condicionado',
+    'Repor amenities (shampoo, sabonete, papel higiênico)',
+    'Esvaziar lixo','Tirar poeira dos móveis'
+  ],
+  Luxo: ['Limpar varanda'],
+  Master: ['Limpar janela'],
+  'Premium-A': ['Limpar varanda','Arrumar sofá cama','Limpar quarto separado'],
+  'Premium-B': ['Limpar varanda','Arrumar sofá cama','Limpar quarto separado'],
+  saida: [
+    'Verificar gavetas e armários','Verificar frigobar',
+    'Verificar controles remotos','Verificar toalhas e enxoval completo',
+    'Verificar tomadas e lâmpadas','Limpeza geral completa'
+  ]
+};
+
+let quartos = [];
+let cronometroAtivo = null;
+let intervalo = null;
+let segundosDecorridos = 0;
+let pausado = false;
+let inicioPausa = null;
+let tempoPausaSegundos = 0;
+
+function formatarTempo(seg) {
+  const h = Math.floor(seg / 3600);
+  const m = Math.floor((seg % 3600) / 60);
+  const s = seg % 60;
+  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function formatarData(dt) {
+  if (!dt) return '-';
+  const d = new Date(dt);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toTimeString().slice(0,5);
+}
+
+async function carregarQuartos() {
+  const res = await fetch('/quartos');
+  quartos = await res.json();
+
+  ['quarto-cron','quarto-manut','quarto-enx'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Selecione o apartamento...</option>';
+    quartos.forEach(q => {
+      const opt = document.createElement('option');
+      opt.value = q.numero;
+      opt.dataset.cat = q.categoria;
+      opt.dataset.ala = q.ala;
+      opt.textContent = `Apto ${q.numero} - ${q.ala} (${q.categoria})`;
+      sel.appendChild(opt);
+    });
+  });
+
+  montarMapaQuartos();
+  montarGridEnxoval();
+}
+
+function montarMapaQuartos() {
+  const mapaDiv = document.getElementById('mapa-quartos');
+  if (!mapaDiv) return;
+  const alas = ['Bloco A - Térreo','Bloco A - 1º Andar','Bloco B - Térreo','Bloco B - 1º Andar'];
+  const cores = {
+    disponivel:  { bg: '#d4edda', border: '#1a6b3c', text: '#155724', label: 'DISP' },
+    ocupado:     { bg: '#f8d7da', border: '#c0392b', text: '#721c24', label: 'OCUP' },
+    em_limpeza:  { bg: '#fff3cd', border: '#e67e22', text: '#856404', label: 'LIMP' },
+    interditado: { bg: '#f3e5f5', border: '#8e44ad', text: '#4a235a', label: 'INTER' }
+  };
+  const catAbrev = { 'Luxo':'LUX','Master':'MST','Premium-A':'PRE-A','Premium-B':'PRE-B' };
+  let html = '';
+  alas.forEach(ala => {
+    const quartosAla = quartos.filter(q => q.ala === ala);
+    if (!quartosAla.length) return;
+    html += `<div style="margin-bottom:20px">
+      <h3 style="color:#6b4c1a;font-size:14px;margin-bottom:10px;padding:6px 12px;
+        background:#fdf3e7;border-radius:8px;border-left:4px solid #6b4c1a">
+        📍 ${ala}
+      </h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px">`;
+    quartosAla.forEach(q => {
+      const cor = cores[q.status] || cores.disponivel;
+      const cat = catAbrev[q.categoria] || q.categoria;
+      html += `<div style="background:${cor.bg};border:2px solid ${cor.border};
+        border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;
+        transition:transform 0.1s"
+        onmouseover="this.style.transform='scale(1.05)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <div style="font-size:18px;font-weight:bold;color:${cor.text}">${String(q.numero).padStart(2,'0')}</div>
+        <div style="font-size:10px;color:${cor.text};margin-top:2px">${cat}</div>
+        <div style="font-size:10px;font-weight:bold;background:${cor.border};color:white;
+          border-radius:4px;padding:2px 4px;margin-top:4px">${cor.label}</div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #eee">
+    <span style="font-size:12px;color:#888">Legenda:</span>
+    <span style="background:#d4edda;border:1px solid #1a6b3c;padding:3px 8px;border-radius:6px;font-size:12px">✅ Disponível</span>
+    <span style="background:#f8d7da;border:1px solid #c0392b;padding:3px 8px;border-radius:6px;font-size:12px">🛏️ Ocupado</span>
+    <span style="background:#fff3cd;border:1px solid #e67e22;padding:3px 8px;border-radius:6px;font-size:12px">🧹 Em Limpeza</span>
+    <span style="background:#f3e5f5;border:1px solid #8e44ad;padding:3px 8px;border-radius:6px;font-size:12px">🔧 Interditado</span>
+  </div>`;
+  mapaDiv.innerHTML = html;
+}
+
+// ========= CRONÔMETRO =========
+async function iniciarCronometro() {
+  const nome = 'Vanessa';
+  const quarto = document.getElementById('quarto-cron').value;
+  const tipo = document.getElementById('tipo-servico-cron').value;
+  const sel = document.getElementById('quarto-cron');
+  const opt = sel.options[sel.selectedIndex];
+  if (!quarto) { alert('Selecione o apartamento!'); return; }
+
+  const res = await fetch('/cronometro/iniciar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), camareira: nome, tipo_servico: tipo })
+  });
+
+  const data = await res.json();
+  if (!res.ok) { alert(data.error); return; }
+
+  cronometroAtivo = { id: data.id, quarto, nome, tipo, cat: opt.dataset.cat, ala: opt.dataset.ala };
+  pausado = false;
+  tempoPausaSegundos = 0;
+
+  document.getElementById('box-cronometro-ativo').style.display = 'block';
+  document.getElementById('card-iniciar').style.display = 'none';
+  document.getElementById('info-cronometro').textContent = `Apto ${quarto} • Vanessa • ${tipo}`;
+  segundosDecorridos = 0;
+
+  if (intervalo) clearInterval(intervalo);
+  intervalo = setInterval(() => {
+    segundosDecorridos++;
+    document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+  }, 1000);
+
+  carregarChecklistCron(quarto, opt.dataset.cat, tipo);
+}
+
+function carregarChecklistCron(apto, cat, tipo) {
+  let tarefas = [...checklists.base];
+  if (checklists[cat]) tarefas = [...tarefas, ...checklists[cat]];
+  if (tipo === 'saida') tarefas = [...tarefas, ...checklists.saida];
+
+  document.getElementById('titulo-checklist').textContent = `Checklist - Apto ${apto} (${cat})`;
+  document.getElementById('card-checklist').style.display = 'block';
+
+  const ul = document.getElementById('checklist');
+  ul.innerHTML = '';
+  tarefas.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.id = `item-${i}`;
+    li.innerHTML = `<input type="checkbox" id="cb-${i}"><span>${t}</span>`;
+    li.onclick = () => toggleItem(i);
+    li.querySelector('input').onclick = (e) => { e.stopPropagation(); toggleItem(i); };
+    ul.appendChild(li);
+  });
+  atualizarProgresso();
+}
+
+function toggleItem(i) {
+  const cb = document.getElementById(`cb-${i}`);
+  const li = document.getElementById(`item-${i}`);
+  cb.checked = !cb.checked;
+  li.classList.toggle('feito', cb.checked);
+  atualizarProgresso();
+}
+
+function atualizarProgresso() {
+  const total = document.querySelectorAll('.checklist li').length;
+  const feitos = document.querySelectorAll('.checklist li.feito').length;
+  const pct = total ? Math.round((feitos / total) * 100) : 0;
+  document.getElementById('barra').style.width = pct + '%';
+  document.getElementById('texto-progresso').textContent = `${feitos} de ${total} tarefas (${pct}%)`;
+}
+
+async function togglePausa() {
+  if (!cronometroAtivo) return;
+  const btn = document.getElementById('btn-pausa');
+
+  if (!pausado) {
+    pausado = true;
+    inicioPausa = new Date();
+    clearInterval(intervalo);
+    intervalo = null;
+    btn.innerHTML = '▶️ Retomar';
+    btn.style.background = 'rgba(0,200,0,0.4)';
+    document.getElementById('tempo-display').style.opacity = '0.5';
+    await fetch('/cronometro/pausar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: cronometroAtivo.id })
+    });
+  } else {
+    const agora = new Date();
+    const pausaMinutos = Math.round((agora - inicioPausa) / 60000);
+    tempoPausaSegundos += Math.round((agora - inicioPausa) / 1000);
+    pausado = false;
+    inicioPausa = null;
+    btn.innerHTML = '⏸️ Pausar';
+    btn.style.background = 'rgba(255,165,0,0.4)';
+    document.getElementById('tempo-display').style.opacity = '1';
+    await fetch('/cronometro/retomar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: cronometroAtivo.id, tempo_pausa: pausaMinutos })
+    });
+    intervalo = setInterval(() => {
+      segundosDecorridos++;
+      document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+    }, 1000);
+  }
+}
+
+async function finalizarCronometro() {
+  if (!cronometroAtivo) return;
+  if (pausado) { alert('Retome a limpeza antes de finalizar!'); return; }
+  const total = document.querySelectorAll('.checklist li').length;
+  const feitos = document.querySelectorAll('.checklist li.feito').length;
+  if (feitos < total) {
+    if (!confirm(`Ainda faltam ${total - feitos} tarefas. Deseja finalizar mesmo assim?`)) return;
+  }
+
+  const res = await fetch('/cronometro/finalizar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: cronometroAtivo.id, quarto_numero: parseInt(cronometroAtivo.quarto) })
+  });
+
+  const data = await res.json();
+  if (!res.ok) { alert(data.error); return; }
+
+  const hora = new Date().toTimeString().slice(0, 5);
+  await fetch('/limpeza', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ala: cronometroAtivo.ala, tempo: hora,
+      tarefas: `Apto ${cronometroAtivo.quarto} - ${cronometroAtivo.tipo} - ${feitos}/${total} tarefas - ${data.duracao} min - Vanessa`
+    })
+  });
+
+  clearInterval(intervalo);
+  intervalo = null;
+  cronometroAtivo = null;
+  pausado = false;
+
+  document.getElementById('box-cronometro-ativo').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+  document.getElementById('card-checklist').style.display = 'none';
+  document.getElementById('quarto-cron').value = '';
+
+  const msg = document.getElementById('msg-limpeza');
+  msg.textContent = `✅ Limpeza finalizada em ${data.duracao} minutos!`;
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 4000);
+  carregarQuartos();
+}
+
+async function cancelarCronometro() {
+  if (!cronometroAtivo) return;
+  if (!confirm('Deseja cancelar essa limpeza?')) return;
+
+  const res = await fetch('/cronometro/cancelar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: cronometroAtivo.id, quarto_numero: parseInt(cronometroAtivo.quarto) })
+  });
+
+  if (!res.ok) { alert('Erro ao cancelar!'); return; }
+
+  clearInterval(intervalo);
+  intervalo = null;
+  cronometroAtivo = null;
+  pausado = false;
+
+  document.getElementById('box-cronometro-ativo').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+  document.getElementById('card-checklist').style.display = 'none';
+  carregarQuartos();
+  alert('✅ Limpeza cancelada!');
+}
+
+async function verificarCronometroAtivo() {
+  try {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    const minha = lista.find(l => l.camareira === 'Vanessa');
+    if (!minha) return;
+
+    cronometroAtivo = { id: minha.id, quarto: minha.quarto_numero, nome: 'Vanessa', tipo: minha.tipo_servico, cat: minha.categoria, ala: minha.ala };
+
+    if (intervalo) { clearInterval(intervalo); intervalo = null; }
+    segundosDecorridos = parseInt(minha.segundos_decorridos) || 0;
+
+    document.getElementById('box-cronometro-ativo').style.display = 'block';
+    document.getElementById('card-iniciar').style.display = 'none';
+    document.getElementById('info-cronometro').textContent = `Apto ${minha.quarto_numero} • Vanessa • ${minha.tipo_servico}`;
+    document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+
+    intervalo = setInterval(() => {
+      segundosDecorridos++;
+      document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+    }, 1000);
+
+    carregarChecklistCron(minha.quarto_numero, minha.categoria, minha.tipo_servico);
+  } catch(e) { console.error('Erro:', e); }
+}
+
+// ========= ENXOVAL =========
+function montarGridEnxoval(categoria) {
+  const grid = document.getElementById('enxoval-grid');
+  if (!grid) return;
+  const padrao = enxovalPadrao[categoria] || {};
+  let html = '';
+  pecas.forEach((p, i) => {
+    const qtd = padrao[p] || 0;
+    html += `<div class="enxoval-item">
+      <h4>🧺 ${p}</h4>
+      <div class="enxoval-row">
+        <span class="enxoval-label">Saiu sujo:</span>
+        <input class="enxoval-num" type="number" id="saiu-${i}" min="0" value="${qtd}">
+      </div>
+      <div class="enxoval-row">
+        <span class="enxoval-label">Entrou limpo:</span>
+        <input class="enxoval-num" type="number" id="entrou-${i}" min="0" value="${qtd}">
+      </div>
+      <div class="dano-check" onclick="toggleDano(${i})">
+        <input type="checkbox" id="dano-cb-${i}" onclick="event.stopPropagation();toggleDano(${i})">
+        <span>⚠️ Peça danificada</span>
+      </div>
+      <div class="dano-obs" id="dano-obs-${i}">
+        <input type="number" id="dano-qtd-${i}" min="1" value="1" placeholder="Quantidade">
+        <input type="text" id="dano-desc-${i}" placeholder="Descreva o dano...">
+      </div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function atualizarEnxovalPadrao() {
+  const sel = document.getElementById('quarto-enx');
+  const opt = sel.options[sel.selectedIndex];
+  const cat = opt ? opt.dataset.cat : null;
+  montarGridEnxoval(cat);
+}
+
+function toggleDano(i) {
+  const cb = document.getElementById(`dano-cb-${i}`);
+  cb.checked = !cb.checked;
+  document.getElementById(`dano-obs-${i}`).style.display = cb.checked ? 'block' : 'none';
+}
+
+async function registrarEnxoval() {
+  const quarto = document.getElementById('quarto-enx').value;
+  if (!quarto) { alert('Selecione o apartamento!'); return; }
+
+  const itens = [];
+  pecas.forEach((p, i) => {
+    const saiu = parseInt(document.getElementById(`saiu-${i}`).value) || 0;
+    const entrou = parseInt(document.getElementById(`entrou-${i}`).value) || 0;
+    const danoCb = document.getElementById(`dano-cb-${i}`).checked;
+    const danoQtd = danoCb ? parseInt(document.getElementById(`dano-qtd-${i}`).value) || 0 : 0;
+    const danoDesc = danoCb ? document.getElementById(`dano-desc-${i}`).value : '';
+    if (saiu > 0 || entrou > 0 || danoQtd > 0) {
+      itens.push({ peca: p, saiu, entrou, danificados: danoQtd, obs_dano: danoDesc });
+    }
+  });
+
+  if (!itens.length) { alert('Informe pelo menos uma peça!'); return; }
+
+  const res = await fetch('/enxoval/movimentacao', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), itens, registrado_por: 'Vanessa', perfil: 'governanta' })
+  });
+
+  if (res.ok) {
+    const msg = document.getElementById('msg-enxoval');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    document.getElementById('quarto-enx').value = '';
+    montarGridEnxoval();
+  }
+}
+
+// ========= MANUTENÇÃO =========
+async function carregarManutencao() {
+  const res = await fetch('/manutencao');
+  const lista = await res.json();
+  const div = document.getElementById('lista-manutencao');
+  const abertas = lista.filter(m => m.status === 'aberto');
+  if (!abertas.length) {
+    div.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma manutenção aberta</p>';
+    return;
+  }
+  div.innerHTML = abertas.map(m => `
+    <div style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:10px;border-left:4px solid #e67e22">
+      <strong>🚪 Apto ${m.quarto_numero}</strong><br>
+      <small>${m.observacao}</small><br>
+      <small style="color:#888">Registrado em: ${formatarData(m.registrado_em)}</small>
+    </div>
+  `).join('');
+}
+
+async function registrarManutencao() {
+  const quarto = document.getElementById('quarto-manut').value;
+  const obs = document.getElementById('obs-manut').value;
+  if (!quarto || !obs) { alert('Preencha todos os campos!'); return; }
+
+  await fetch('/manutencao', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), observacao: obs })
+  });
+
+  const msg = document.getElementById('msg-manut');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+  document.getElementById('quarto-manut').value = '';
+  document.getElementById('obs-manut').value = '';
+  carregarManutencao();
+}
+
+// ========= LAVANDERIA =========
+async function carregarLavanderia() {
+  const [resPend, resAnd] = await Promise.all([
+    fetch('/lavanderia/pendentes'),
+    fetch('/lavanderia/emandamento')
+  ]);
+  const pendentes = await resPend.json();
+  const emAndamento = await resAnd.json();
+
+  const divPend = document.getElementById('lavanderia-pendentes');
+  if (!pendentes.length) {
+    divPend.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nenhuma peça pendente hoje</p>';
+  } else {
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Peça</th>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd</th>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Enviar</th>';
+    html += '</tr></thead><tbody>';
+    pendentes.forEach((p, i) => {
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${p.peca}</td>
+        <td style="padding:10px;font-size:13px">${p.total}</td>
+        <td style="padding:10px">
+          <input type="number" id="env-${i}" value="${p.total}" min="0" max="${p.total}"
+            style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"
+            data-peca="${p.peca}">
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<input type="text" id="enviado-por" placeholder="Seu nome"
+      style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ddd;font-size:14px">`;
+    html += `<button onclick="enviarLavanderia(${JSON.stringify(pendentes).replace(/"/g,'&quot;')})"
+      style="width:100%;padding:12px;background:#1a6b3c;color:white;border:none;border-radius:8px;
+      font-size:14px;font-weight:bold;cursor:pointer;margin-top:10px">
+      👕 Confirmar Envio para Lavanderia</button>`;
+    divPend.innerHTML = html;
+  }
+
+  const divAnd = document.getElementById('lavanderia-andamento');
+  if (!emAndamento.length) {
+    divAnd.innerHTML = '<p style="color:#888;text-align:center;padding:10px">Nada na lavanderia agora</p>';
+  } else {
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Peça</th>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Enviado</th>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd</th>';
+    html += '<th style="background:#6b4c1a;color:white;padding:10px;text-align:left;font-size:13px">Qtd Voltou</th>';
+    html += '</tr></thead><tbody>';
+    emAndamento.forEach(e => {
+      html += `<tr style="border-bottom:1px solid #eee">
+        <td style="padding:10px;font-size:13px">🧺 ${e.peca}</td>
+        <td style="padding:10px;font-size:13px">${formatarData(e.enviado_em)}</td>
+        <td style="padding:10px;font-size:13px">${e.quantidade}</td>
+        <td style="padding:10px">
+          <input type="number" id="ret-${e.id}" min="0" max="${e.quantidade}" value="${e.quantidade}"
+            style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"
+            data-id="${e.id}" data-peca="${e.peca}">
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<div style="margin-top:15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="ret-por-geral" placeholder="Seu nome (quem conferiu)"
+        style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:14px">
+      <button onclick="confirmarRetornoTudo()"
+        style="padding:12px 20px;background:#1a6b3c;color:white;border:none;
+        border-radius:8px;font-weight:bold;cursor:pointer;font-size:14px">
+        ✅ Confirmar Retorno de Tudo
+      </button>
+    </div>`;
+    divAnd.innerHTML = html;
+  }
+}
+
+async function enviarLavanderia(pendentes) {
+  const nome = document.getElementById('enviado-por').value;
+  if (!nome) { alert('Digite seu nome!'); return; }
+  const itens = pendentes.map((p,i) => ({ peca:p.peca, quantidade:parseInt(document.getElementById(`env-${i}`).value)||0 })).filter(i => i.quantidade > 0);
+  if (!itens.length) { alert('Informe pelo menos uma peça!'); return; }
+  const res = await fetch('/lavanderia/enviar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({itens, enviado_por:nome}) });
+  if (res.ok) { alert('✅ Enxoval enviado!'); carregarLavanderia(); }
+}
+
+async function confirmarRetornoTudo() {
+  const nome = document.getElementById('ret-por-geral').value;
+  if (!nome) { alert('Digite seu nome!'); return; }
+  const inputs = document.querySelectorAll('[data-id][data-peca]');
+  if (!inputs.length) { alert('Nenhum item para confirmar!'); return; }
+  if (!confirm('Confirmar retorno da lavanderia?')) return;
+
+  let pendentes = inputs.length;
+  let erros = 0;
+  inputs.forEach(async input => {
+    const id = input.getAttribute('data-id');
+    const peca = input.getAttribute('data-peca');
+    const qtd = parseInt(input.value) || 0;
+    if (qtd === 0) { pendentes--; return; }
+    const res = await fetch('/lavanderia/retorno', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:parseInt(id), peca, quantidade_retornada:qtd, retornado_por:nome}) });
+    if (!res.ok) erros++;
+    pendentes--;
+    if (pendentes === 0) {
+      alert(erros > 0 ? `⚠️ ${erros} erro(s)!` : '✅ Retorno confirmado!');
+      carregarLavanderia();
+    }
+  });
+}
+
+function mostrarAba(aba) {
+  ['limpeza','quartos','lavanderia','enxoval','manutencao'].forEach((a, i) => {
+    document.getElementById(`aba-${a}`).style.display = a === aba ? 'block' : 'none';
+    document.querySelectorAll('.tab')[i].classList.toggle('ativo', a === aba);
+  });
+  if (aba === 'quartos') carregarQuartos();
+  if (aba === 'lavanderia') carregarLavanderia();
+  if (aba === 'manutencao') carregarManutencao();
+  if (aba === 'limpeza' && cronometroAtivo) verificarCronometroAtivo();
+}
+
+carregarQuartos();
+setTimeout(() => verificarCronometroAtivo(), 500);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    setTimeout(() => verificarCronometroAtivo(), 300);
+  }
+});
+
+window.addEventListener('focus', () => {
+  setTimeout(() => verificarCronometroAtivo(), 300);
+});
+
+setInterval(async () => {
+  if (cronometroAtivo && !pausado) {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    const minha = lista.find(l => l.camareira === 'Vanessa');
+    if (minha) {
+      if (intervalo) clearInterval(intervalo);
+      segundosDecorridos = parseInt(minha.segundos_decorridos) || 0;
+      intervalo = setInterval(() => {
+        segundosDecorridos++;
+        document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+      }, 1000);
+    }
+  }
+}, 30000);
+
+</script>
+</body>
+</html>

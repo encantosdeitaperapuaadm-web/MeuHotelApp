@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camareira - Hotel Encantos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f0; padding: 20px; }
+    header {
+      background: linear-gradient(135deg, #1a6b3c, #2ecc71);
+      color: white; padding: 15px 20px;
+      border-radius: 10px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 18px; }
+    .card {
+      background: white; padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .card h2 { color: #1a6b3c; margin-bottom: 15px; font-size: 16px; }
+    select, input, textarea {
+      width: 100%; padding: 12px; margin: 8px 0;
+      border-radius: 8px; border: 1px solid #ddd; font-size: 15px;
+    }
+    button {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 8px;
+      font-size: 15px; font-weight: bold; cursor: pointer;
+      margin-top: 10px; color: white;
+    }
+    .btn-verde { background: #1a6b3c; }
+    .btn-verde:hover { background: #2ecc71; }
+    .btn-laranja { background: #e67e22; }
+    .btn-laranja:hover { background: #f39c12; }
+    .btn-azul { background: #2196F3; }
+    .btn-azul:hover { background: #1a3a6b; }
+    .btn-vermelho { background: #c0392b; }
+    .btn-vermelho:hover { background: #e74c3c; }
+    .checklist { list-style: none; margin-top: 10px; }
+    .checklist li {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-bottom: 1px solid #eee;
+      font-size: 15px; cursor: pointer;
+    }
+    .checklist li input[type=checkbox] { width: 22px; height: 22px; margin: 0; cursor: pointer; }
+    .checklist li.feito { text-decoration: line-through; color: #aaa; }
+    .progresso { background: #eee; border-radius: 10px; height: 10px; margin: 10px 0; }
+    .progresso-bar { background: #2ecc71; height: 10px; border-radius: 10px; transition: width 0.3s; }
+    .progresso-texto { font-size: 13px; color: #888; text-align: right; }
+    .mensagem {
+      display: none; padding: 12px; border-radius: 8px;
+      margin-top: 10px; text-align: center; font-weight: bold;
+    }
+    .msg-verde { background: #d4edda; color: #155724; }
+    .msg-laranja { background: #fff3cd; color: #856404; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab {
+      flex: 1; padding: 10px; text-align: center;
+      border-radius: 8px; cursor: pointer;
+      font-weight: bold; font-size: 12px;
+      border: 2px solid #ddd; background: white; color: #888;
+      min-width: 70px;
+    }
+    .tab.ativo { background: #1a6b3c; color: white; border-color: #1a6b3c; }
+    .enxoval-item {
+      background: #f9f9f9; border-radius: 10px;
+      padding: 12px; border: 1px solid #eee; margin-bottom: 10px;
+    }
+    .enxoval-item h4 { color: #1a6b3c; font-size: 14px; margin-bottom: 8px; }
+    .enxoval-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+    .enxoval-label { font-size: 12px; color: #666; width: 100px; flex-shrink: 0; }
+    .enxoval-num { width: 80px; padding: 6px; margin: 0; text-align: center; font-size: 14px; border-radius: 6px; border: 1px solid #ddd; }
+    .dano-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer; }
+    .dano-check input { width: 18px; height: 18px; margin: 0; cursor: pointer; }
+    .dano-check span { font-size: 13px; color: #c0392b; font-weight: bold; }
+    .dano-obs { display: none; margin-top: 6px; }
+    /* Cronômetro */
+    .cronometro-box {
+      background: linear-gradient(135deg, #1a6b3c, #2ecc71);
+      border-radius: 12px; padding: 20px;
+      text-align: center; color: white; margin-bottom: 15px;
+    }
+    .cronometro-box h3 { font-size: 14px; margin-bottom: 10px; opacity: 0.9; }
+    .cronometro-tempo {
+      font-size: 48px; font-weight: bold;
+      letter-spacing: 4px; margin: 10px 0;
+    }
+    .cronometro-info { font-size: 13px; opacity: 0.85; margin-bottom: 15px; }
+    .cronometro-ativo { display: none; }
+    a { color: white; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🧹 Camareira</h1>
+  <a href="login.html">← Sair</a>
+</header>
+
+<div class="tabs">
+  <div class="tab ativo" onclick="mostrarAba('limpeza')">🧹 Limpeza</div>
+  <div class="tab" onclick="mostrarAba('enxoval')">🛏️ Enxoval</div>
+  <div class="tab" onclick="mostrarAba('manutencao')">🔧 Manutenção</div>
+</div>
+
+<div class="card" id="card-nome" style="display:none">
+  <h2>👤 Quem está usando?</h2>
+  <select id="select-nome">
+    <option value="">Selecione seu nome...</option>
+    <option value="Flávia">Flávia</option>
+    <option value="Renata">Renata</option>
+  </select>
+  <button class="btn-verde" onclick="confirmarNome()">✅ Confirmar</button>
+</div>
+
+<!-- ABA LIMPEZA -->
+<div id="aba-limpeza">
+
+  <!-- Cronômetro ativo -->
+  <div class="cronometro-ativo card" id="box-cronometro-ativo">
+    <div class="cronometro-box">
+      <h3>⏱️ Limpeza em andamento</h3>
+      <div class="cronometro-tempo" id="tempo-display">00:00</div>
+      <div class="cronometro-info" id="info-cronometro">Apto - Camareira</div>
+      <button class="btn-vermelho" style="background:rgba(255,255,255,0.2);border:2px solid white;margin-top:5px" onclick="finalizarCronometro()">
+        ⏹️ Finalizar Limpeza
+      </button>
+      <button id="btn-pausa" style="background:rgba(255,165,0,0.4);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="togglePausa()">
+        ⏸️ Pausar
+      </button>
+      <button style="background:rgba(255,0,0,0.3);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="cancelarCronometro()">
+        ❌ Cancelar Limpeza
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="card-ala" >
+  <h2>📍 Selecione sua Ala</h2>
+  <p style="color:#1a6b3c;font-weight:bold;padding:8px 0">
+    👤 Olá, <span id="nome-display"></span>!
+  </p>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+    <button class="btn-verde" onclick="selecionarAla('Bloco A - Térreo')">
+      🏠 Bloco A - Térreo
+    </button>
+    <button class="btn-verde" onclick="selecionarAla('Bloco A - 1º Andar')">
+      🏠 Bloco A - 1º Andar
+    </button>
+   <button class="btn-verde" onclick="selecionarAla('Bloco B')">
+  🏠 Bloco B
+</button>
+    <button style="background:#888;width:100%;padding:14px;border:none;border-radius:8px;color:white;font-weight:bold;cursor:pointer" onclick="selecionarAla('todas')">
+      📋 Ver Todos os Apartamentos
+    </button>
+  </div>
+</div>
+
+<div class="card" id="card-iniciar" style="display:none">
+  <h2>▶️ Iniciar Limpeza</h2>
+  <input type="text" id="nome-camareira" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <p style="color:#1a6b3c;font-weight:bold">
+      👤 <span id="nome-display2"></span> • 📍 <span id="ala-display"></span>
+    </p>
+    <button onclick="voltarAla()" style="background:none;border:none;color:#888;cursor:pointer;font-size:13px;width:auto;padding:5px">
+      ← Trocar ala
+    </button>
+  </div>
+    <select id="quarto-cron">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <select id="tipo-servico-cron">
+      <option value="limpeza">Limpeza</option>
+      <option value="saida">Limpeza de Saída</option>
+    </select>
+    <button class="btn-verde" onclick="iniciarCronometro()">▶️ Iniciar Limpeza</button>
+    <div class="mensagem msg-laranja" id="msg-cron"></div>
+  </div>
+
+  <div class="card" id="card-checklist" style="display:none">
+    <h2 id="titulo-checklist">Checklist</h2>
+    <div class="progresso">
+      <div class="progresso-bar" id="barra" style="width:0%"></div>
+    </div>
+    <div class="progresso-texto" id="texto-progresso">0 de 0 tarefas</div>
+    <ul class="checklist" id="checklist"></ul>
+    <div class="mensagem msg-verde" id="msg-limpeza">Limpeza finalizada com sucesso!</div>
+  </div>
+</div>
+
+<!-- ABA ENXOVAL -->
+<div id="aba-enxoval" style="display:none">
+  <div class="card">
+    <h2>🛏️ Registrar Troca de Enxoval</h2>
+    <select id="quarto-enx" onchange="atualizarEnxovalPadrao()">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <div id="enxoval-grid"></div>
+    <button class="btn-azul" onclick="registrarEnxoval()">🛏️ Registrar Enxoval</button>
+    <div class="mensagem msg-verde" id="msg-enxoval">Enxoval registrado com sucesso!</div>
+  </div>
+</div>
+
+<!-- ABA MANUTENÇÃO -->
+<div id="aba-manutencao" style="display:none">
+  <div class="card">
+    <h2>🔧 Registrar Manutenção</h2>
+    <select id="quarto-manut">
+      <option value="">Selecione o apartamento...</option>
+    </select>
+    <textarea id="obs-manut" rows="4" placeholder="Descreva o problema..."></textarea>
+    <button class="btn-laranja" onclick="registrarManutencao()">🔧 Registrar Problema</button>
+    <div class="mensagem msg-laranja" id="msg-manut">Manutenção registrada!</div>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+socket.on('update', () => carregarQuartos());
+
+const pecas = [
+  'Lençol Casal','Lençol Solteiro','Fronha',
+  'Travesseiro','Cobertor','Toalha de Piso',
+  'Toalha de Rosto','Toalha de Banho'
+];
+
+const checklists = {
+  base: [
+    'Arrumar cama casal','Arrumar cama solteiro',
+    'Limpar banheiro','Limpar pia e espelho',
+    'Varrer o quarto','Passar pano no chão',
+    'Limpar ar condicionado',
+    'Repor amenities (shampoo, sabonete, papel higiênico)',
+    'Esvaziar lixo','Tirar poeira dos móveis'
+  ],
+  Luxo: ['Limpar varanda'],
+  Master: ['Limpar janela'],
+  'Premium-A': ['Limpar varanda','Arrumar sofá cama','Limpar quarto separado'],
+  'Premium-B': ['Limpar varanda','Arrumar sofá cama','Limpar quarto separado'],
+  saida: [
+    'Verificar gavetas e armários','Verificar frigobar',
+    'Verificar controles remotos','Verificar toalhas e enxoval completo',
+    'Verificar tomadas e lâmpadas','Limpeza geral completa'
+  ]
+};
+
+let quartos = [];
+let cronometroAtivo = null;
+let intervalo = null;
+let segundosDecorridos = 0;
+let pausado = false;
+let inicioPausa = null;
+let tempoPausaSegundos = 0;
+
+async function verificarCronometroAtivo() {
+  try {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    if (!lista.length) return;
+
+    // Pega SOMENTE a limpeza da camareira logada
+    const nomeSalvo = localStorage.getItem('nomeCamareira');
+    const minha = lista.find(l => l.camareira === nomeSalvo);
+    if (!minha) return; // Se não for dela, não mostra nada
+
+    cronometroAtivo = {
+      id: minha.id,
+      quarto: minha.quarto_numero,
+      nome: nomeSalvo,
+      tipo: minha.tipo_servico,
+      cat: minha.categoria,
+      ala: minha.ala
+    };
+
+    if (intervalo) {
+      clearInterval(intervalo);
+      intervalo = null;
+    }
+
+    segundosDecorridos = parseInt(minha.segundos_decorridos) || 0;
+
+    document.getElementById('box-cronometro-ativo').style.display = 'block';
+document.getElementById('card-iniciar').style.display = 'none';
+document.getElementById('card-ala').style.display = 'none';
+document.getElementById('card-checklist').style.display = 'block';
+document.getElementById('info-cronometro').textContent =
+  `Apto ${minha.quarto_numero} • ${nomeSalvo} • ${minha.tipo_servico}`;
+document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+
+    intervalo = setInterval(() => {
+      segundosDecorridos++;
+      document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+    }, 1000);
+
+    carregarChecklistCron(minha.quarto_numero, minha.categoria, minha.tipo_servico);
+  } catch(e) {
+    console.error('Erro ao verificar cronômetro:', e);
+  }
+}
+
+async function carregarQuartos() {
+  const res = await fetch('/quartos');
+  quartos = await res.json();
+  ['quarto-cron','quarto-manut','quarto-enx'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">Selecione o apartamento...</option>';
+    quartos.forEach(q => {
+      const opt = document.createElement('option');
+      opt.value = q.numero;
+      opt.dataset.cat = q.categoria;
+      opt.dataset.ala = q.ala;
+      opt.textContent = `Apto ${q.numero} - ${q.ala} (${q.categoria})`;
+      sel.appendChild(opt);
+    });
+  });
+  montarGridEnxoval();
+}
+
+// ========= CRONÔMETRO =========
+function formatarTempo(seg) {
+  const h = Math.floor(seg / 3600);
+  const m = Math.floor((seg % 3600) / 60);
+  const s = seg % 60;
+  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function iniciarRelogio() {
+  if (intervalo) clearInterval(intervalo);
+  segundosDecorridos = 0;
+  intervalo = setInterval(() => {
+    segundosDecorridos++;
+    document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+  }, 1000);
+}
+
+function confirmarNome() {
+  const nome = document.getElementById('select-nome').value;
+  if (!nome) { alert('Selecione seu nome!'); return; }
+  localStorage.setItem('nomeCamareira', nome);
+  document.getElementById('nome-camareira').value = nome;
+  document.getElementById('card-nome').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+  verificarCronometroAtivo();
+}
+
+function selecionarAla(ala) {
+  const nome = localStorage.getItem('nomeCamareira');
+  document.getElementById('nome-display2').textContent = nome;
+  document.getElementById('ala-display').textContent = ala === 'todas' ? 'Todas as alas' : ala;
+  document.getElementById('card-ala').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+
+  const sel = document.getElementById('quarto-cron');
+  sel.innerHTML = '<option value="">Selecione o apartamento...</option>';
+
+  quartos.forEach(q => {
+    let incluir = false;
+
+    if (ala === 'todas') {
+      incluir = true;
+    } else if (ala === 'Bloco B') {
+      // Bloco B inclui térreo, 1º andar E o apto 18
+      incluir = q.ala === 'Bloco B - Térreo' || 
+                q.ala === 'Bloco B - 1º Andar' || 
+                q.numero === 18;
+    } else {
+      incluir = q.ala === ala;
+    }
+
+    if (incluir) {
+      const opt = document.createElement('option');
+      opt.value = q.numero;
+      opt.dataset.cat = q.categoria;
+      opt.dataset.ala = q.ala;
+      opt.textContent = `Apto ${q.numero} - ${q.ala} (${q.categoria})`;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function voltarAla() {
+  document.getElementById('card-ala').style.display = 'block';
+  document.getElementById('card-iniciar').style.display = 'none';
+  document.getElementById('card-checklist').style.display = 'none';
+}
+
+async function iniciarCronometro() {
+  const nome = document.getElementById('nome-camareira').value.trim();
+  const quarto = document.getElementById('quarto-cron').value;
+  const tipo = document.getElementById('tipo-servico-cron').value;
+  const sel = document.getElementById('quarto-cron');
+  const opt = sel.options[sel.selectedIndex];
+
+  if (!nome) { alert('Digite seu nome!'); return; }
+  if (!quarto) { alert('Selecione o apartamento!'); return; }
+
+  const res = await fetch('/cronometro/iniciar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), camareira: nome, tipo_servico: tipo })
+  });
+
+  const data = await res.json();
+  if (!res.ok) { alert(data.error); return; }
+
+  cronometroAtivo = { id: data.id, quarto, nome, tipo, cat: opt.dataset.cat, ala: opt.dataset.ala };
+
+  // Mostra cronômetro
+  document.getElementById('box-cronometro-ativo').style.display = 'block';
+  document.getElementById('card-iniciar').style.display = 'none';
+  document.getElementById('info-cronometro').textContent = `Apto ${quarto} • ${nome} • ${tipo}`;
+  iniciarRelogio();
+
+  // Carrega checklist
+  carregarChecklistCron(quarto, opt.dataset.cat, tipo);
+}
+
+function carregarChecklistCron(apto, cat, tipo) {
+  let tarefas = [...checklists.base];
+  if (checklists[cat]) tarefas = [...tarefas, ...checklists[cat]];
+  if (tipo === 'saida') tarefas = [...tarefas, ...checklists.saida];
+
+  document.getElementById('titulo-checklist').textContent = `Checklist - Apto ${apto} (${cat})`;
+  document.getElementById('card-checklist').style.display = 'block';
+
+  const ul = document.getElementById('checklist');
+  ul.innerHTML = '';
+  tarefas.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.id = `item-${i}`;
+    li.innerHTML = `<input type="checkbox" id="cb-${i}"><span>${t}</span>`;
+    li.onclick = () => toggleItem(i);
+    li.querySelector('input').onclick = (e) => { e.stopPropagation(); toggleItem(i); };
+    ul.appendChild(li);
+  });
+  atualizarProgresso();
+}
+
+function toggleItem(i) {
+  const cb = document.getElementById(`cb-${i}`);
+  const li = document.getElementById(`item-${i}`);
+  cb.checked = !cb.checked;
+  li.classList.toggle('feito', cb.checked);
+  atualizarProgresso();
+}
+
+function atualizarProgresso() {
+  const total = document.querySelectorAll('.checklist li').length;
+  const feitos = document.querySelectorAll('.checklist li.feito').length;
+  const pct = total ? Math.round((feitos / total) * 100) : 0;
+  document.getElementById('barra').style.width = pct + '%';
+  document.getElementById('texto-progresso').textContent = `${feitos} de ${total} tarefas (${pct}%)`;
+}
+
+async function finalizarCronometro() {
+  if (!cronometroAtivo) return;
+
+  const total = document.querySelectorAll('.checklist li').length;
+  const feitos = document.querySelectorAll('.checklist li.feito').length;
+
+  if (feitos < total) {
+    if (!confirm(`Ainda faltam ${total - feitos} tarefas. Deseja finalizar mesmo assim?`)) return;
+  }
+
+  const res = await fetch('/cronometro/finalizar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: cronometroAtivo.id, quarto_numero: parseInt(cronometroAtivo.quarto) })
+  });
+
+  const data = await res.json();
+  if (!res.ok) { alert(data.error); return; }
+
+  // Registra limpeza
+  const hora = new Date().toTimeString().slice(0, 5);
+  await fetch('/limpeza', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ala: cronometroAtivo.ala,
+      tempo: hora,
+      tarefas: `Apto ${cronometroAtivo.quarto} - ${cronometroAtivo.tipo} - ${feitos}/${total} tarefas - ${data.duracao} min - ${cronometroAtivo.nome}`
+    })
+  });
+
+  // Para cronômetro
+  clearInterval(intervalo);
+  intervalo = null;
+  cronometroAtivo = null;
+
+  // Reseta tela
+  document.getElementById('box-cronometro-ativo').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+  document.getElementById('card-checklist').style.display = 'none';
+  document.getElementById('nome-camareira').value = '';
+  document.getElementById('quarto-cron').value = '';
+
+  const msg = document.getElementById('msg-limpeza');
+  msg.textContent = `✅ Limpeza finalizada em ${data.duracao} minutos!`;
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 4000);
+  carregarQuartos();
+
+// Verifica se já tem nome salvo no celular
+const nomeSalvo = localStorage.getItem('nomeCamareira');
+if (!nomeSalvo) {
+  document.getElementById('card-nome').style.display = 'block';
+  document.getElementById('card-iniciar').style.display = 'none';
+} else {
+  document.getElementById('nome-camareira').value = nomeSalvo;
+  verificarCronometroAtivo();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') verificarCronometroAtivo();
+});
+window.addEventListener('focus', () => verificarCronometroAtivo());
+
+// Recupera cronômetro quando a tela volta do sleep
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    verificarCronometroAtivo();
+  }
+});
+
+// Recupera também quando a janela volta ao foco
+window.addEventListener('focus', () => {
+  verificarCronometroAtivo();
+});
+
+// Recupera quando a página é recarregada
+window.addEventListener('pageshow', () => {
+  verificarCronometroAtivo();
+});
+
+// Sincroniza o cronômetro com o servidor a cada 30 segundos
+setInterval(async () => {
+  if (cronometroAtivo) {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    if (lista.length) {
+      if (intervalo) clearInterval(intervalo);
+      segundosDecorridos = parseInt(lista[0].segundos_decorridos) || 0;
+      intervalo = setInterval(() => {
+        segundosDecorridos++;
+        document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+      }, 1000);
+    }
+  }
+}, 30000);
+}
+
+// ========= ENXOVAL =========
+const enxovalPadrao = {
+  'Luxo':      { 'Lençol Casal':1, 'Lençol Solteiro':1, 'Fronha':2, 'Travesseiro':2, 'Cobertor':1, 'Toalha de Piso':1, 'Toalha de Rosto':2, 'Toalha de Banho':2 },
+  'Master':    { 'Lençol Casal':1, 'Lençol Solteiro':2, 'Fronha':4, 'Travesseiro':4, 'Cobertor':1, 'Toalha de Piso':2, 'Toalha de Rosto':4, 'Toalha de Banho':4 },
+  'Premium-A': { 'Lençol Casal':1, 'Lençol Solteiro':2, 'Fronha':4, 'Travesseiro':4, 'Cobertor':1, 'Toalha de Piso':3, 'Toalha de Rosto':6, 'Toalha de Banho':6 },
+  'Premium-B': { 'Lençol Casal':1, 'Lençol Solteiro':1, 'Fronha':2, 'Travesseiro':2, 'Cobertor':1, 'Toalha de Piso':2, 'Toalha de Rosto':4, 'Toalha de Banho':4 }
+};
+
+function montarGridEnxoval(categoria) {
+  const grid = document.getElementById('enxoval-grid');
+  if (!grid) return;
+  const padrao = enxovalPadrao[categoria] || {};
+  let html = '';
+  pecas.forEach((p, i) => {
+    const qtd = padrao[p] || 0;
+    html += `
+      <div class="enxoval-item">
+        <h4>🧺 ${p}</h4>
+        <div class="enxoval-row">
+          <span class="enxoval-label">Saiu sujo:</span>
+          <input class="enxoval-num" type="number" id="saiu-${i}" min="0" value="${qtd}">
+        </div>
+        <div class="enxoval-row">
+          <span class="enxoval-label">Entrou limpo:</span>
+          <input class="enxoval-num" type="number" id="entrou-${i}" min="0" value="${qtd}">
+        </div>
+        <div class="dano-check" onclick="toggleDano(${i})">
+          <input type="checkbox" id="dano-cb-${i}" onclick="event.stopPropagation();toggleDano(${i})">
+          <span>⚠️ Peça danificada</span>
+        </div>
+        <div class="dano-obs" id="dano-obs-${i}">
+          <input type="number" id="dano-qtd-${i}" min="1" value="1" placeholder="Quantidade danificada">
+          <input type="text" id="dano-desc-${i}" placeholder="Descreva o dano...">
+        </div>
+      </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function atualizarEnxovalPadrao() {
+  const sel = document.getElementById('quarto-enx');
+  const opt = sel.options[sel.selectedIndex];
+  const cat = opt ? opt.dataset.cat : null;
+  montarGridEnxoval(cat);
+}
+
+function toggleDano(i) {
+  const cb = document.getElementById(`dano-cb-${i}`);
+  cb.checked = !cb.checked;
+  document.getElementById(`dano-obs-${i}`).style.display = cb.checked ? 'block' : 'none';
+}
+
+async function registrarEnxoval() {
+  const quarto = document.getElementById('quarto-enx').value;
+  const nome = localStorage.getItem('nomeCamareira');
+  if (!quarto) { alert('Selecione o apartamento!'); return; }
+
+  const itens = [];
+  pecas.forEach((p, i) => {
+    const saiu = parseInt(document.getElementById(`saiu-${i}`).value) || 0;
+    const entrou = parseInt(document.getElementById(`entrou-${i}`).value) || 0;
+    const danoCb = document.getElementById(`dano-cb-${i}`).checked;
+    const danoQtd = danoCb ? parseInt(document.getElementById(`dano-qtd-${i}`).value) || 0 : 0;
+    const danoDesc = danoCb ? document.getElementById(`dano-desc-${i}`).value : '';
+    if (saiu > 0 || entrou > 0 || danoQtd > 0) {
+      itens.push({ peca: p, saiu, entrou, danificados: danoQtd, obs_dano: danoDesc });
+    }
+  });
+
+  if (!itens.length) { alert('Informe pelo menos uma peça!'); return; }
+
+  const res = await fetch('/enxoval/movimentacao', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), itens, registrado_por: nome, perfil: 'camareira' })
+  });
+
+  if (res.ok) {
+    const msg = document.getElementById('msg-enxoval');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    document.getElementById('quarto-enx').value = '';
+    document.getElementById('nome-cam').value = '';
+    montarGridEnxoval();
+  }
+}
+
+async function togglePausa() {
+  if (!cronometroAtivo) return;
+  const btn = document.getElementById('btn-pausa');
+
+  if (!pausado) {
+    pausado = true;
+    inicioPausa = new Date();
+    clearInterval(intervalo);
+    intervalo = null;
+    btn.innerHTML = '▶️ Retomar';
+    btn.style.background = 'rgba(0,200,0,0.4)';
+    document.getElementById('tempo-display').style.opacity = '0.5';
+
+    await fetch('/cronometro/pausar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: cronometroAtivo.id })
+    });
+
+  } else {
+    const agora = new Date();
+    const pausaMinutos = Math.round((agora - inicioPausa) / 60000);
+    tempoPausaSegundos += Math.round((agora - inicioPausa) / 1000);
+    pausado = false;
+    inicioPausa = null;
+    btn.innerHTML = '⏸️ Pausar';
+    btn.style.background = 'rgba(255,165,0,0.4)';
+    document.getElementById('tempo-display').style.opacity = '1';
+
+    await fetch('/cronometro/retomar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: cronometroAtivo.id, tempo_pausa: pausaMinutos })
+    });
+
+    intervalo = setInterval(() => {
+      segundosDecorridos++;
+      document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+    }, 1000);
+  }
+}
+
+async function cancelarCronometro() {
+  if (!cronometroAtivo) return;
+  if (!confirm('Deseja cancelar essa limpeza? O tempo não será registrado.')) return;
+
+  await fetch('/cronometro/cancelar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: cronometroAtivo.id, quarto_numero: parseInt(cronometroAtivo.quarto) })
+  });
+
+  clearInterval(intervalo);
+  intervalo = null;
+  cronometroAtivo = null;
+
+  document.getElementById('box-cronometro-ativo').style.display = 'none';
+  document.getElementById('card-iniciar').style.display = 'block';
+  document.getElementById('card-checklist').style.display = 'none';
+  carregarQuartos();
+}
+
+// ========= MANUTENÇÃO =========
+async function registrarManutencao() {
+  const quarto = document.getElementById('quarto-manut').value;
+  const obs = document.getElementById('obs-manut').value;
+  if (!quarto || !obs) { alert('Preencha todos os campos!'); return; }
+
+  await fetch('/manutencao', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quarto_numero: parseInt(quarto), observacao: obs })
+  });
+
+  const msg = document.getElementById('msg-manut');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+  document.getElementById('quarto-manut').value = '';
+  document.getElementById('obs-manut').value = '';
+}
+
+function mostrarAba(aba) {
+  ['limpeza','enxoval','manutencao'].forEach((a, i) => {
+    document.getElementById(`aba-${a}`).style.display = a === aba ? 'block' : 'none';
+    document.querySelectorAll('.tab')[i].classList.toggle('ativo', a === aba);
+  });
+  // Quando voltar para limpeza, retoma cronômetro do tempo correto
+  if (aba === 'limpeza' && cronometroAtivo) {
+    async function verificarCronometroAtivo() {
+  try {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    if (!lista.length) return;
+
+    // Pega qualquer limpeza em andamento
+    // (se tiver mais de uma, pega a mais recente)
+    const l = lista[lista.length - 1];
+
+    cronometroAtivo = {
+      id: l.id,
+      quarto: l.quarto_numero,
+      nome: l.camareira,
+      tipo: l.tipo_servico,
+      cat: l.categoria,
+      ala: l.ala
+    };
+
+    if (intervalo) {
+      clearInterval(intervalo);
+      intervalo = null;
+    }
+
+    segundosDecorridos = parseInt(l.segundos_decorridos) || 0;
+
+    document.getElementById('box-cronometro-ativo').style.display = 'block';
+    document.getElementById('card-iniciar').style.display = 'none';
+    document.getElementById('info-cronometro').textContent =
+      `Apto ${l.quarto_numero} • ${l.camareira} • ${l.tipo_servico}`;
+    document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+
+    intervalo = setInterval(() => {
+      segundosDecorridos++;
+      document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+    }, 1000);
+
+    carregarChecklistCron(l.quarto_numero, l.categoria, l.tipo_servico);
+  } catch(e) {
+    console.error('Erro ao verificar cronômetro:', e);
+  }
+}
+  }
+}
+
+// Mostra nome da camareira
+const nomeSalvo = localStorage.getItem('nomeCamareira');
+if (!nomeSalvo) {
+  window.location.href = 'login.html';
+} else {
+  document.getElementById('nome-camareira').value = nomeSalvo;
+  document.getElementById('nome-display').textContent = nomeSalvo;
+  document.getElementById('card-ala').style.display = 'block';
+  document.getElementById('card-iniciar').style.display = 'none';
+  carregarQuartos();
+  // Pequeno delay para garantir que a página carregou
+  setTimeout(() => {
+    verificarCronometroAtivo();
+  }, 500);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    setTimeout(() => verificarCronometroAtivo(), 300);
+  }
+});
+
+window.addEventListener('focus', () => {
+  setTimeout(() => verificarCronometroAtivo(), 300);
+});
+
+window.addEventListener('pageshow', (e) => {
+  setTimeout(() => verificarCronometroAtivo(), 300);
+});
+
+setInterval(async () => {
+  if (cronometroAtivo) {
+    const res = await fetch('/cronometro/andamento');
+    const lista = await res.json();
+    const nomeSalvo = localStorage.getItem('nomeCamareira');
+    const meu = lista.find(l => l.camareira === nomeSalvo);
+    if (meu) {
+      if (intervalo) clearInterval(intervalo);
+      segundosDecorridos = parseInt(meu.segundos_decorridos) || 0;
+      intervalo = setInterval(() => {
+        segundosDecorridos++;
+        document.getElementById('tempo-display').textContent = formatarTempo(segundosDecorridos);
+      }, 1000);
+    }
+  }
+}, 30000);
+</script>
+</body>
+</html>

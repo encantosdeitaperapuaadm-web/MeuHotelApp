@@ -1,0 +1,11 @@
+apto,status,servico,checkin,checkout,adultos,criancas
+01,Vago,Chegada hoje,14/04/2026,18/04/2026,2,0
+02,Ocupado,Arrumação,12/04/2026,17/04/2026,2,0
+03,Ocupado,Troca de enxoval,11/04/2026,17/04/2026,1,0
+04,Vago,Sem tarefas,,,0,0
+05,Ocupado,Check-out,10/04/2026,14/04/2026,2,0
+06,Vago,Chegada hoje,14/04/2026,19/04/2026,2,1
+07,Interdição,,,,,
+08,Ocupado,Arrumação,13/04/2026,17/04/2026,2,0
+09,Vago,Chegada hoje,14/04/2026,16/04/2026,1,0
+10,Ocupado,Troca de enxoval,11/04/2026,16/04/2026,2,1
