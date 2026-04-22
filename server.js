@@ -55,7 +55,6 @@ app.post('/limpeza-quarto', (req, res) => {
     detalhes_enxoval,  // ex: 'piso e rosto', 'enxoval completo'
     data               // formato: '2026-04-20'
   } = req.body;
-
   // Validação básica
   if (!quarto_numero || !camareira_nome || !tipo_servico || !data) {
     return res.status(400).json({ error: 'Dados obrigatórios faltando.' });
@@ -73,6 +72,95 @@ app.post('/limpeza-quarto', (req, res) => {
       }
       io.emit('update', 'limpeza_quarto');
       res.json({ id: this.lastID });
+    }
+  );
+});
+
+// ==================== RELATÓRIO DIÁRIO DA CAMAREIRA ====================
+app.get('/relatorio-diario-camareira', (req, res) => {
+  const { camareira, data } = req.query;
+
+  if (!camareira || !data) {
+    return res.status(400).json({ error: 'Informe camareira e data no formato AAAA-MM-DD.' });
+  }
+
+  db.all(
+    `SELECT * FROM limpezas_quartos
+     WHERE camareira_nome = ?
+       AND data = ?
+     ORDER BY quarto_numero ASC`,
+    [camareira, data],
+    (err, rows) => {
+      if (err) {
+        console.error('Erro ao buscar limpezas_quartos:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // Se não tiver nenhum registro no dia
+      if (!rows || rows.length === 0) {
+        return res.json({
+          texto: `Hotel Encantos de Itaperapuã
+         📅 Resumo da camareira – ${data}
+         👤 Camareira: ${camareira}
+
+          Nenhum registro de serviço para esta data.`
+        });
+      }
+
+      // Separar por tipo de serviço
+      const limpezas = rows.filter(r =>
+        r.tipo_servico === 'arrumacao' || r.tipo_servico === 'checkout'
+      );
+      const trocas = rows.filter(r => r.tipo_servico === 'troca_enxoval');
+      const dispensas = rows.filter(r => r.tipo_servico === 'dispensa');
+
+      // Montar blocos de texto
+      // 1) Cabeçalho
+      let texto = `Hotel Encantos de Itaperapuã
+      📅 Resumo da camareira – ${data}
+      👤 Camareira: ${camareira}`;
+
+      // 2) Limpezas (arrumação + check-out)
+      texto += '🧹 Limpezas realizadas (todas com troca de piso):\n';
+      if (limpezas.length === 0) {
+        texto += '• Nenhuma limpeza registrada.\n\n';
+      } else {
+        limpezas.forEach(r => {
+          if (r.tipo_servico === 'checkout') {
+            // Check-out = troca total de enxoval
+            texto += `• UH ${r.quarto_numero} – Check-out (troca total de enxoval)\n`;
+          } else {
+            texto += `• UH ${r.quarto_numero} – Arrumação\n`;
+          }
+        });
+        texto += '\n';
+      }
+
+      // 3) Trocas de enxoval (além do piso)
+      texto += '🧺 Unidades com troca de enxoval (além do piso):\n';
+      if (trocas.length === 0) {
+        texto += '• Nenhuma troca de enxoval registrada.\n\n';
+      } else {
+        trocas.forEach(r => {
+          const detalhe = r.detalhes_enxoval && r.detalhes_enxoval.trim().length > 0
+            ? r.detalhes_enxoval
+            : 'enxoval registrado';
+          texto += `• UH ${r.quarto_numero} – ${detalhe}\n`;
+        });
+        texto += '\n';
+      }
+
+      // 4) Dispensa de limpeza
+      texto += '🚫 Quartos com dispensa de limpeza:\n';
+      if (dispensas.length === 0) {
+        texto += '• Nenhuma dispensa registrada.\n';
+      } else {
+        dispensas.forEach(r => {
+          texto += `• UH ${r.quarto_numero}\n`;
+        });
+      }
+
+      res.json({ texto });
     }
   );
 });
