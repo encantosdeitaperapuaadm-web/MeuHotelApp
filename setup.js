@@ -161,6 +161,18 @@ db.run(`CREATE TABLE IF NOT EXISTS equipe (
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  db.run(`
+  CREATE TABLE IF NOT EXISTS limpezas_quartos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quarto_numero INTEGER,
+    camareira_nome TEXT,
+    tipo_servico TEXT, -- arrumacao | troca_enxoval | checkout | dispensa
+    detalhes_enxoval TEXT, -- ex: 'piso e rosto', 'enxoval completo'
+    data TEXT, -- formato: '2026-04-20'
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 // Camareiras iniciais
 db.run(`INSERT OR IGNORE INTO equipe (nome, cargo) VALUES ('Flávia', 'camareira')`);
 db.run(`INSERT OR IGNORE INTO equipe (nome, cargo) VALUES ('Renata', 'camareira')`);
