@@ -21,7 +21,8 @@ const db = new sqlite3.Database('hotel.db');
 
 // ==================== QUARTOS ====================
 app.get('/quartos', (req, res) => {
-    db.all('SELECT * FROM quartos ORDER BY numero', (err, rows) => {
+    // Suporte a prioridade na ordenação
+    db.all('SELECT * FROM quartos ORDER BY numero ASC', (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
@@ -35,12 +36,8 @@ app.get('/limpezas', (req, res) => {
     });
 });
 
-// ==================== LIMPEZAS POR QUARTO ====================
 app.post('/limpeza-quarto', (req, res) => {
     const { quarto_numero, camareira_nome, tipo_servico, detalhes_enxoval, data } = req.body;
-    if (!quarto_numero || !camareira_nome || !tipo_servico || !data) {
-        return res.status(400).json({ error: 'Dados obrigatórios faltando.' });
-    }
     db.run(
         `INSERT INTO limpezas_quartos (quarto_numero, camareira_nome, tipo_servico, detalhes_enxoval, data) VALUES (?, ?, ?, ?, ?)`,
         [quarto_numero, camareira_nome, tipo_servico, detalhes_enxoval || '', data],
@@ -68,14 +65,34 @@ app.post('/checkin', (req, res) => {
 
 app.post('/checkout', (req, res) => {
     const { quarto_numero } = req.body;
-    db.run('UPDATE quartos SET status = "disponivel" WHERE numero = ?', [quarto_numero], function (err) {
+    db.run('UPDATE quartos SET status = "disponivel" WHERE numero = ?', [quarto_numero], (err) => {
         if (err) return res.status(500).json({ error: err.message });
         io.emit('update', 'checkout');
         res.json({ ok: true });
     });
 });
 
+// ==================== NOVOS ENDPOINTS ====================
+app.get('/hospedes-total', (req, res) => {
+    db.get('SELECT SUM(adultos) as adultos, SUM(criancas) as criancas FROM checkin_checkout WHERE checkout >= date("now")', (err, row) => {
+        res.json(row || { adultos: 0, criancas: 0 });
+    });
+});
+
+app.get('/chegadas-semana', (req, res) => {
+    db.all("SELECT * FROM checkin_checkout WHERE checkin >= date('now') AND checkin <= date('now', '+7 days') ORDER BY checkin ASC", (err, rows) => {
+        res.json(rows);
+    });
+});
+
 // ==================== MANUTENÇÃO ====================
+app.get('/manutencao', (req, res) => {
+    db.all('SELECT * FROM manutencao ORDER BY status ASC, registrado_em DESC', (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
 app.post('/manutencao', (req, res) => {
     const { quarto_numero, observacao, registrado_por } = req.body;
     db.run('INSERT INTO manutencao (quarto_numero, observacao, registrado_por) VALUES (?, ?, ?)',
@@ -86,13 +103,6 @@ app.post('/manutencao', (req, res) => {
             res.json({ id: this.lastID });
         }
     );
-});
-
-app.get('/manutencao', (req, res) => {
-    db.all('SELECT * FROM manutencao ORDER BY status ASC, registrado_em DESC', (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
-    });
 });
 
 app.post('/manutencao/resolver', (req, res) => {
@@ -142,7 +152,7 @@ app.post('/importar-confirmar', (req, res) => {
     quartos.forEach(q => {
         db.run('UPDATE quartos SET status=? WHERE numero=?', [q.status, q.apto], () => {
             if (q.servico === 'Chegada hoje' || q.checkin) {
-                 db.run(`INSERT INTO checkin_checkout (quarto_numero, nome_hospede, checkin, checkout, adultos, criancas) VALUES (?, ?, ?, ?, ?, ?)`,
+                db.run(`INSERT INTO checkin_checkout (quarto_numero, nome_hospede, checkin, checkout, adultos, criancas) VALUES (?, ?, ?, ?, ?, ?)`,
                     [q.apto, 'Importado HITS', q.checkin, q.checkout, q.adultos||0, q.criancas||0]);
             }
             pendentes--;

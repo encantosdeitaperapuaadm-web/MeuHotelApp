@@ -1,129 +1,107 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camareira - Hotel Encantos</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding-bottom: 70px; }
-        header { background: #1a6b3c; color: white; padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 10px; }
-        .filtro-ala { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding: 5px 0; }
-        
-        .chip { padding: 8px 15px; background: white; border-radius: 20px; font-size: 13px; font-weight: bold; color: #666; white-space: nowrap; border: 1px solid #ddd; }
-        .chip.active { background: #1a6b3c; color: white; border-color: #1a6b3c; }
-        .lista-cards { display: grid; gap: 10px; }
-        .card-quarto { background: white; border-radius: 12px; display: flex; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .status-bar { width: 12px; }
-        .bar-disponivel { background: #27ae60; }
-        .bar-ocupado { background: #c0392b; }
-        .bar-limpeza { background: #f1c40f; }
-        .card-content { flex: 1; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .quarto-num { font-size: 20px; font-weight: bold; color: #1a3a6b; }
-        .servico-tag { font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 5px; text-transform: uppercase; }
-        .tag-checkout { background: #fdeaea; color: #c0392b; }
-        .tag-limpeza { background: #e8f5e9; color: #2e7d32; }
-        .tag-prioridade { background: #fff3e0; color: #ef6c00; border: 1px solid #ff9800; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
-        .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-green { background: #27ae60; color: white; }
-        .btn-orange { background: #e67e22; color: white; }
-        .btn-gray { background: #f0f0f0; color: #666; }
-    </style>
-</head>
-<body>
-    <header>
-        <h3>🧹 Camareiras</h3>
-        <span id="nome-camareira" style="font-size: 14px;"></span>
-    </header>
-
-    <div class="container">
-        <div class="filtro-ala" id="abas-ala">
-            <div class="chip active">Minha Ala</div>
-            <div class="chip">Todas</div>
-        </div>
-
-        <div class="lista-cards" id="lista-quartos">
-            <!-- Cards via JS -->
-        </div>
-    </div>
-
-    <!-- Modal Ações -->
-    <div id="modal-servico" class="modal">
-        <div class="modal-content">
-            <h2 id="modal-quarto-titulo" style="margin-bottom:20px; color:#1a3a6b">Apto 00</h2>
-            <div id="status-atual" style="margin-bottom:20px; font-size:14px; color:#666"></div>
-            
-            <button class="btn btn-green" onclick="startAction('arrumacao')">✨ Iniciar Arrumação</button>
-            <button class="btn btn-orange" onclick="startAction('checkout')">🚪 Iniciar Check-out</button>
-            <button class="btn btn-gray" onclick="closeModal()">Cancelar</button>
-        </div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        let quartos = [];
-        let camareira = localStorage.getItem('camareira_nome') || 'Camareira';
-
-        document.getElementById('nome-camareira').textContent = camareira;
-
-        async function loadQuartos() {
-            const res = await fetch('/quartos');
-            quartos = await res.json();
-            renderQuartos();
-        }
-
-        function renderQuartos() {
-            const lista = document.getElementById('lista-quartos');
-            lista.innerHTML = '';
-
-            quartos.forEach(q => {
-                const card = document.createElement('div');
-                card.className = 'card-quarto';
-                card.onclick = () => openAction(q);
-
-                const statusBar = q.status === 'ocupado' ? 'bar-ocupado' : (q.status === 'em_limpeza' ? 'bar-limpeza' : 'bar-disponivel');
-                
-                // Simulação de lógica de serviço
-                let tag = '';
-                if(q.status === 'ocupado') tag = '<span class="servico-tag tag-limpeza">Arrumação</span>';
-                
-                card.innerHTML = `
-                    <div class="status-bar ${statusBar}"></div>
-                    <div class="card-content">
-                        <div>
-                            <div class="quarto-num">${q.numero}</div>
-                            <div style="font-size:11px; color:#888">${q.categoria}</div>
-                        </div>
-                        <div>${tag}</div>
-                    </div>
-                `;
-                lista.appendChild(card);
-            });
-        }
-
-        function openAction(q) {
-            document.getElementById('modal-quarto-titulo').textContent = `Apto ${q.numero}`;
-            document.getElementById('status-atual').textContent = `Status: ${q.status.toUpperCase()}`;
-            document.getElementById('modal-servico').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('modal-servico').style.display = 'none';
-        }
-
-        async function startAction(tipo) {
-            // Lógica de cronômetro e registro
-            closeModal();
-            alert('Serviço iniciado!');
-        }
-
-        socket.on('update', () => loadQuartos());
-        loadQuartos();
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="pt-br"><head> <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Camareira - Hotel Encantos</title>
+ <style>
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding-bottom: 70px; }
+ header { background: #1a6b3c; color: white; padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+ .container { padding: 10px; }
+ .filtro-ala { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding: 5px 0; }
+ .chip { padding: 8px 15px; background: white; border-radius: 20px; font-size: 13px; font-weight: bold; color: #666; white-space: nowrap; border: 1px solid #ddd; }
+ .chip.active { background: #1a6b3c; color: white; border-color: #1a6b3c; }
+ .lista-cards { display: grid; gap: 10px; }
+ .card-quarto { background: white; border-radius: 12px; display: flex; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+ .status-bar { width: 12px; }
+ .bar-disponivel { background: #27ae60; }
+ .bar-ocupado { background: #c0392b; }
+ .bar-limpeza { background: #f1c40f; }
+ .card-content { flex: 1; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+ .quarto-num { font-size: 20px; font-weight: bold; color: #1a3a6b; }
+ .servico-tag { font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 5px; text-transform: uppercase; }
+ .tag-checkout { background: #fdeaea; color: #c0392b; }
+ .tag-limpeza { background: #e8f5e9; color: #2e7d32; }
+ .tag-prioridade { background: #fff3e0; color: #ef6c00; border: 1px solid #ff9800; animation: blink 1s infinite; }
+ @keyframes blink { 50% { opacity: 0.5; } }
+ .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
+ .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; }
+ .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+ .btn-green { background: #27ae60; color: white; }
+ .btn-orange { background: #e67e22; color: white; }
+ .btn-gray { background: #f0f0f0; color: #666; }
+ </style></head><body> <header>
+ <h3>🧹 Camareiras</h3>
+ <span id="nome-camareira" style="font-size: 14px;"></span>
+ </header>
+ <div class="container">
+ <div class="filtro-ala" id="abas-ala">
+ <div class="chip active">Minha Ala</div>
+ <div class="chip">Todas</div>
+ </div>
+ <div class="lista-cards" id="lista-quartos">
+ <!-- Cards via JS -->
+ </div>
+ </div>
+ <!-- Modal Ações -->
+ <div id="modal-servico" class="modal">
+ <div class="modal-content">
+ <h2 id="modal-quarto-titulo" style="margin-bottom:20px; color:#1a3a6b">Apto 00</h2>
+ <div id="status-atual" style="margin-bottom:20px; font-size:14px; color:#666"></div>
+ <br> 
+ <button class="btn btn-green" onclick="startAction('arrumacao')">✨ Iniciar Arrumação</button>
+ <button class="btn btn-orange" onclick="startAction('checkout')">🚪 Iniciar Check-out</button>
+ <button class="btn btn-gray" onclick="closeModal()">Cancelar</button>
+ </div>
+ </div>
+ <script src="/socket.io/socket.io.js"></script>
+ <script>
+ const socket = io();
+ let quartos = [];
+ let camareira = localStorage.getItem('camareira_nome') || 'Camareira';
+ document.getElementById('nome-camareira').textContent = camareira;
+ async function loadQuartos() {
+ const res = await fetch('/quartos');
+ quartos = await res.json();
+ renderQuartos();
+ }
+ function renderQuartos() {
+ const lista = document.getElementById('lista-quartos');
+ lista.innerHTML = '';
+ quartos.forEach(q => {
+ const card = document.createElement('div');
+ card.className = 'card-quarto';
+ card.onclick = () => openAction(q);
+ const statusBar = q.status === 'ocupado' ? 'bar-ocupado' : (q.status === 'em_limpeza' ? 'bar-limpeza' : 'bar-disponivel');
+ 
+ // Simulação de lógica de serviço
+ let tag = '';
+ if(q.status === 'ocupado') tag = '<span class="servico-tag tag-limpeza">Arrumação</span>';
+ 
+ card.innerHTML = `
+ <div class="status-bar ${statusBar}"></div>
+ <div class="card-content">
+ <div>
+ <div class="quarto-num">${q.numero}</div>
+ <div style="font-size:11px; color:#888">${q.categoria}</div>
+ </div>
+ <div>${tag}</div>
+ </div>
+ `;
+ lista.appendChild(card);
+ });
+ }
+ function openAction(q) {
+ document.getElementById('modal-quarto-titulo').textContent = `Apto ${q.numero}`;
+ document.getElementById('status-atual').textContent = `Status: ${q.status.toUpperCase()}`;
+ document.getElementById('modal-servico').style.display = 'flex';
+ }
+ function closeModal() {
+ document.getElementById('modal-servico').style.display = 'none';
+ }
+ async function startAction(tipo) {
+ // Lógica de cronômetro e registro
+ closeModal();
+ alert('Serviço iniciado!');
+ }
+ socket.on('update', () => loadQuartos());
+ loadQuartos();
+ </script></body></html>
