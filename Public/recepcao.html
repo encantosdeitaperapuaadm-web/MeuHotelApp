@@ -1,518 +1,211 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recepção - Hotel Encantos</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f0f4f0; padding: 20px; }
-    header {
-      background: linear-gradient(135deg, #1a3a6b, #2196F3);
-      color: white; padding: 15px 20px;
-      border-radius: 10px; margin-bottom: 20px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    header h1 { font-size: 18px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-    .tab {
-      flex: 1; padding: 10px; text-align: center;
-      border-radius: 8px; cursor: pointer;
-      font-weight: bold; font-size: 12px;
-      border: 2px solid #ddd; background: white; color: #888;
-      min-width: 80px;
-    }
-    .tab.ativo { background: #1a3a6b; color: white; border-color: #1a3a6b; }
-    .card {
-      background: white; padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    .card h2 { color: #1a3a6b; margin-bottom: 15px; font-size: 16px; }
-    input, select {
-      width: 100%; padding: 12px; margin: 8px 0;
-      border-radius: 8px; border: 1px solid #ddd; font-size: 15px;
-    }
-    .botoes { display: flex; gap: 10px; margin-top: 10px; }
-    button {
-      flex: 1; padding: 14px; color: white;
-      border: none; border-radius: 8px;
-      font-size: 14px; font-weight: bold; cursor: pointer;
-    }
-    .btn-checkin { background: #1a3a6b; }
-    .btn-checkin:hover { background: #2196F3; }
-    .btn-checkout { background: #c0392b; }
-    .btn-checkout:hover { background: #e74c3c; }
-    .btn-azul { background: #2196F3; }
-    .btn-azul:hover { background: #1a3a6b; }
-    .btn-verde { background: #1a6b3c; }
-    .btn-verde:hover { background: #2ecc71; }
-    .btn-laranja { background: #e67e22; }
-    .btn-laranja:hover { background: #f39c12; }
-    .mensagem {
-      display: none; padding: 12px; border-radius: 8px;
-      margin-top: 10px; text-align: center; font-weight: bold;
-    }
-    .msg-verde { background: #d4edda; color: #155724; }
-    .msg-azul { background: #cce5ff; color: #004085; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { background: #1a3a6b; color: white; padding: 10px; text-align: left; font-size: 13px; }
-    td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
-    tr:hover { background: #f5f5f5; }
-    .status-ocupado { color: #c0392b; font-weight: bold; }
-    .status-disponivel { color: #1a6b3c; font-weight: bold; }
-    .status-interditado { color: #e67e22; font-weight: bold; }
-    .cat-luxo { background: #fff3cd; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
-    .cat-master { background: #cce5ff; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
-    .cat-premiuma { background: #d4edda; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
-    .cat-premiumb { background: #f8d7da; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
-    .enxoval-item {
-      background: #f9f9f9; border-radius: 10px;
-      padding: 12px; border: 1px solid #eee; margin-bottom: 10px;
-    }
-    .enxoval-item h4 { color: #1a3a6b; font-size: 14px; margin-bottom: 8px; }
-    .enxoval-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
-    .enxoval-label { font-size: 12px; color: #666; width: 100px; flex-shrink: 0; }
-    .enxoval-num { width: 80px; padding: 6px; margin: 0; text-align: center; font-size: 14px; border-radius: 6px; border: 1px solid #ddd; }
-    .import-box {
-      border: 2px dashed #2196F3; border-radius: 12px;
-      padding: 30px; text-align: center; cursor: pointer;
-      margin: 15px 0; transition: background 0.2s;
-    }
-    .import-box:hover { background: #e3f2fd; }
-    .import-box p { color: #2196F3; font-size: 15px; font-weight: bold; margin-top: 8px; }
-    .import-box small { color: #888; font-size: 12px; }
-    .resumo-item {
-      display: flex; justify-content: space-between;
-      padding: 10px; border-bottom: 1px solid #eee; font-size: 13px;
-      align-items: center;
-    }
-    .acao-checkin { color: #1a6b3c; font-weight: bold; }
-    .acao-checkout { color: #c0392b; font-weight: bold; }
-    .acao-interditado { color: #e67e22; font-weight: bold; }
-    .acao-matem { color: #888; }
-    .prompt-box {
-      background: #f8f9fa; border: 1px solid #dee2e6;
-      border-radius: 8px; padding: 15px; margin: 15px 0;
-      font-size: 13px; color: #495057;
-    }
-    .prompt-box h4 { color: #1a3a6b; margin-bottom: 8px; }
-    .prompt-box code {
-      background: #e9ecef; padding: 8px; border-radius: 6px;
-      display: block; margin-top: 8px; font-size: 12px;
-      white-space: pre-wrap; color: #212529;
-    }
-    a { color: white; font-size: 13px; text-decoration: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepção - Hotel Encantos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f6; padding: 15px; }
+        header { background: #1a3a6b; color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #fff; padding: 5px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; color: #666; transition: 0.3s; }
+        .tab.active { background: #1a3a6b; color: white; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { font-size: 16px; color: #1a3a6b; margin-bottom: 15px; border-left: 4px solid #1a3a6b; padding-left: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; color: white; }
+        .btn-blue { background: #1a3a6b; }
+        .btn-green { background: #27ae60; }
+        .btn-red { background: #c0392b; }
+        .grid-quartos { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .quarto-card { padding: 15px 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .quarto-card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+        .status-disponivel { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .status-ocupado { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .status-limpeza { background: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+    </style>
 </head>
 <body>
+    <header>
+        <h3>🏨 Recepção</h3>
+        <a href="login.html" style="color: white; text-decoration: none; font-size: 14px;">Sair</a>
+    </header>
 
-<header>
-  <h1>🏨 Recepção</h1>
-  <a href="login.html">← Sair</a>
-</header>
-
-<div class="tabs">
-  <div class="tab ativo" onclick="mostrarAba('importar')">📊 Importar CSV</div>
-  <div class="tab" onclick="mostrarAba('checkin')">✅ Check-in/out</div>
-  <div class="tab" onclick="mostrarAba('enxoval')">🛏️ Enxoval</div>
-  <div class="tab" onclick="mostrarAba('quartos')">🚪 Quartos</div>
-</div>
-
-<!-- ABA IMPORTAR CSV -->
-<div id="aba-importar">
-  <div class="card">
-    <h2>📊 Importar Relatório do HITS via CSV</h2>
-
-    <div class="prompt-box">
-      <h4>📋 Como usar:</h4>
-      1. Tire o PDF do HITS normalmente<br>
-      2. Cole o conteúdo do PDF nessa IA: <strong>chatgpt.com</strong><br>
-      3. Use o prompt abaixo para converter para CSV<br>
-      4. Salve o arquivo como <strong>.csv</strong> e importe aqui
-      de>Converta esse relatório de hotel para CSV com as colunas: apto,status,servico,checkin,checkout,adultos,criancas. Use vírgula como separador. Datas no formato DD/MM/AAAA. Status deve ser exatamente: Vago, Ocupado ou Interdição. Serviço deve ser: Sem tarefas, Arrumação, Troca de enxoval, Check-out ou Chegada hoje.</code>
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('mapa')">Mapa</div>
+        <div class="tab" onclick="showTab('import')">Importar</div>
+        <div class="tab" onclick="showTab('manut')">Manutenção</div>
     </div>
 
-    <div class="import-box" onclick="document.getElementById('csv-input').click()">
-      <div style="font-size:40px">📊</div>
-      <p>Clique aqui para selecionar o arquivo CSV</p>
-      <small>Arquivo .csv gerado pela IA a partir do relatório HITS</small>
+    <div id="tab-mapa" class="content">
+        <div class="card">
+            <h2>Mapa de Quartos</h2>
+            <div id="grid-quartos" class="grid-quartos">Carregando...</div>
+        </div>
     </div>
-    <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="processarCSV()">
 
-    <div id="resultado-import" style="display:none">
-      <h3 style="color:#1a3a6b;margin:15px 0 10px">📋 Resumo da Importação</h3>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
-        <div style="background:#d4edda;padding:10px 15px;border-radius:8px;text-align:center;flex:1">
-          <div style="font-size:22px;font-weight:bold;color:#1a6b3c" id="count-checkin">0</div>
-          <div style="font-size:12px;color:#155724">Check-ins</div>
+    <div id="tab-import" class="content" style="display:none">
+        <div class="card">
+            <h2>Importar HITS (CSV)</h2>
+            <input type="file" id="csv-input" accept=".csv">
+            <button class="btn btn-blue" onclick="processCSV()">Analisar Arquivo</button>
+            <div id="import-resumo" style="margin-top:15px; display:none"></div>
         </div>
-        <div style="background:#f8d7da;padding:10px 15px;border-radius:8px;text-align:center;flex:1">
-          <div style="font-size:22px;font-weight:bold;color:#c0392b" id="count-checkout">0</div>
-          <div style="font-size:12px;color:#721c24">Check-outs</div>
-        </div>
-        <div style="background:#fff3cd;padding:10px 15px;border-radius:8px;text-align:center;flex:1">
-          <div style="font-size:22px;font-weight:bold;color:#e67e22" id="count-interditado">0</div>
-          <div style="font-size:12px;color:#856404">Interditados</div>
-        </div>
-        <div style="background:#f0f4f0;padding:10px 15px;border-radius:8px;text-align:center;flex:1">
-          <div style="font-size:22px;font-weight:bold;color:#888" id="count-matem">0</div>
-          <div style="font-size:12px;color:#666">Sem alteração</div>
-        </div>
-      </div>
-      <div id="lista-import"></div>
-      <div style="display:flex;gap:10px;margin-top:15px">
-        <button class="btn-verde" style="flex:2" onclick="confirmarImportacao()">✅ Confirmar e Atualizar</button>
-        <button class="btn-laranja" style="flex:1" onclick="cancelarImportacao()">❌ Cancelar</button>
-      </div>
     </div>
-    <div class="mensagem msg-verde" id="msg-import"></div>
-  </div>
-</div>
 
-<!-- ABA CHECK-IN/OUT MANUAL -->
-<div id="aba-checkin" style="display:none">
-  <div class="card">
-    <h2>✅ Check-in / Check-out Manual</h2>
-    <p style="color:#888;font-size:13px;margin-bottom:10px">Use quando precisar registrar manualmente.</p>
-    <input type="number" id="quarto" placeholder="Número do Apartamento">
-    <input type="text" id="nome" placeholder="Nome do Hóspede">
-    <input type="date" id="checkin">
-    <input type="date" id="checkout">
-    <div class="botoes">
-      <button class="btn-checkin" onclick="fazerCheckin()">✅ Check-in</button>
-      <button class="btn-checkout" onclick="fazerCheckout()">🚪 Check-out</button>
-    </div>
-    <div class="mensagem msg-verde" id="msg"></div>
-  </div>
-</div>
-
-<!-- ABA ENXOVAL -->
-<div id="aba-enxoval" style="display:none">
-  <div class="card">
-    <h2>🛏️ Pedido Extra de Enxoval</h2>
-    <p style="color:#888;font-size:13px;margin-bottom:10px">Para hóspedes que solicitam enxoval fora do horário das camareiras.</p>
-    <select id="quarto-enx">
-      <option value="">Selecione o apartamento...</option>
-    </select>
-    <input type="text" id="nome-rec" placeholder="Seu nome (recepcionista)">
-    <div id="enxoval-grid"></div>
-    <button class="btn-azul" style="width:100%;margin-top:10px" onclick="registrarEnxoval()">🛏️ Registrar Pedido</button>
-    <div class="mensagem msg-azul" id="msg-enxoval">Pedido registrado com sucesso!</div>
-  </div>
-</div>
-
-<!-- ABA QUARTOS -->
-<div id="aba-quartos" style="display:none">
-  <div class="card">
-    <h2>🚪 Status dos Apartamentos</h2>
-    <div id="mapa-quartos">
-      <p style="color:#888;text-align:center">Carregando...</p>
-    </div>
-  </div>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const socket = io();
-socket.on('update', () => carregarQuartos());
-
-const pecas = [
-  'Lençol Casal','Lençol Solteiro','Fronha',
-  'Travesseiro','Cobertor','Toalha de Piso',
-  'Toalha de Rosto','Toalha de Banho'
-];
-
-let dadosImportacao = [];
-
-function categoriaCss(cat) {
-  if (!cat) return '';
-  return 'cat-' + cat.toLowerCase().replace('-','');
-}
-
-async function carregarQuartos() {
-  const res = await fetch('/quartos');
-  const quartos = await res.json();
-
-  const sel = document.getElementById('quarto-enx');
-  if (sel) {
-    sel.innerHTML = '<option value="">Selecione o apartamento...</option>';
-    quartos.forEach(q => {
-      const opt = document.createElement('option');
-      opt.value = q.numero;
-      opt.textContent = `Apto ${q.numero} - ${q.ala} (${q.categoria})`;
-      sel.appendChild(opt);
-    });
-  }
-
-  montarMapaQuartos(quartos);
-}
-
-function montarMapaQuartos(quartos) {
-  const mapaDiv = document.getElementById('mapa-quartos');
-  if (!mapaDiv) return;
-
-  const alas = [
-    'Bloco A - Térreo',
-    'Bloco A - 1º Andar',
-    'Bloco B - Térreo',
-    'Bloco B - 1º Andar'
-  ];
-
-  const cores = {
-    disponivel:  { bg: '#d4edda', border: '#1a6b3c', text: '#155724', label: 'DISP' },
-    ocupado:     { bg: '#f8d7da', border: '#c0392b', text: '#721c24', label: 'OCUP' },
-    em_limpeza:  { bg: '#fff3cd', border: '#e67e22', text: '#856404', label: 'LIMP' },
-    interditado: { bg: '#f3e5f5', border: '#8e44ad', text: '#4a235a', label: 'INTER' }
-  };
-
-  const catAbrev = {
-    'Luxo': 'LUX', 'Master': 'MST',
-    'Premium-A': 'PRE-A', 'Premium-B': 'PRE-B'
-  };
-
-  let html = '';
-  alas.forEach(ala => {
-    const quartosAla = quartos.filter(q => q.ala === ala);
-    if (!quartosAla.length) return;
-
-    html += `<div style="margin-bottom:20px">
-      <h3 style="color:#1a3a6b;font-size:14px;margin-bottom:10px;
-        padding:6px 12px;background:#e8f0fb;border-radius:8px;
-        border-left:4px solid #1a3a6b">
-        📍 ${ala}
-      </h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px">`;
-
-    quartosAla.forEach(q => {
-      const cor = cores[q.status] || cores.disponivel;
-      const cat = catAbrev[q.categoria] || q.categoria;
-      html += `
-        <div style="
-          background:${cor.bg};
-          border:2px solid ${cor.border};
-          border-radius:10px;
-          padding:10px 5px;
-          text-align:center;
-          cursor:pointer;
-          transition:transform 0.1s"
-          onclick="selecionarQuartoCheckin(${q.numero})"
-          onmouseover="this.style.transform='scale(1.05)'"
-          onmouseout="this.style.transform='scale(1)'">
-          <div style="font-size:18px;font-weight:bold;color:${cor.text}">${String(q.numero).padStart(2,'0')}</div>
-          <div style="font-size:10px;color:${cor.text};margin-top:2px">${cat}</div>
-          <div style="font-size:10px;font-weight:bold;
-            background:${cor.border};color:white;
-            border-radius:4px;padding:2px 4px;margin-top:4px">
-            ${cor.label}
-          </div>
-        </div>`;
-    });
-
-    html += '</div></div>';
-  });
-
-  html += `
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #eee">
-      <span style="font-size:12px;color:#888">Legenda:</span>
-      <span style="background:#d4edda;border:1px solid #1a6b3c;padding:3px 8px;border-radius:6px;font-size:12px">✅ Disponível</span>
-      <span style="background:#f8d7da;border:1px solid #c0392b;padding:3px 8px;border-radius:6px;font-size:12px">🛏️ Ocupado</span>
-      <span style="background:#fff3cd;border:1px solid #e67e22;padding:3px 8px;border-radius:6px;font-size:12px">🧹 Em Limpeza</span>
-      <span style="background:#f3e5f5;border:1px solid #8e44ad;padding:3px 8px;border-radius:6px;font-size:12px">🔧 Interditado</span>
-    </div>`;
-
-  mapaDiv.innerHTML = html;
-}
-
-function selecionarQuartoCheckin(numero) {
-  // Ao clicar no quarto vai para a aba check-in com o número preenchido
-  mostrarAba('checkin');
-  document.getElementById('quarto').value = numero;
-  document.getElementById('nome').focus();
-}
-
-function montarGridEnxoval() {
-  const grid = document.getElementById('enxoval-grid');
-  let html = '';
-  pecas.forEach((p, i) => {
-    html += `
-      <div class="enxoval-item">
-        <h4>🧺 ${p}</h4>
-        <div class="enxoval-row">
-          <span class="enxoval-label">Quantidade:</span>
-          <input class="enxoval-num" type="number" id="qtd-${i}" min="0" value="0">
+    <div id="tab-manut" class="content" style="display:none">
+        <div class="card">
+            <h2>Abrir Manutenção</h2>
+            <select id="manut-quarto"></select>
+            <textarea id="manut-obs" placeholder="Descreva o problema..."></textarea>
+            <button class="btn btn-blue" onclick="saveManut()">Registrar Chamado</button>
         </div>
-      </div>`;
-  });
-  grid.innerHTML = html;
-}
+        <div class="card">
+            <h2>Chamados Abertos</h2>
+            <div id="lista-manut"></div>
+        </div>
+    </div>
 
-async function processarCSV() {
-  const input = document.getElementById('csv-input');
-  if (!input.files[0]) return;
+    <!-- Modal Ações Quarto -->
+    <div id="modal-quarto" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin-bottom:15px">Apto</h3>
+            <div id="quarto-info" style="margin-bottom:20px; font-size:14px; color:#666"></div>
+            
+            <div id="form-checkin">
+                <input type="text" id="hospede" placeholder="Nome do Hóspede">
+                <div style="display:flex; gap:10px">
+                    <input type="number" id="adultos" placeholder="Adultos" value="2">
+                    <input type="number" id="criancas" placeholder="Crianças" value="0">
+                </div>
+                <button class="btn btn-green" onclick="doCheckin()">Realizar Check-in</button>
+            </div>
+            
+            <button id="btn-checkout" class="btn btn-red" style="display:none" onclick="doCheckout()">Realizar Check-out</button>
+            <button class="btn" style="background:#888; margin-top:10px" onclick="closeModal()">Fechar</button>
+        </div>
+    </div>
 
-  const formData = new FormData();
-  formData.append('csv', input.files[0]);
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let selectedQuarto = null;
 
-  const res = await fetch('/importar-csv', { method: 'POST', body: formData });
-  const data = await res.json();
+        async function loadQuartos() {
+            const res = await fetch('/quartos');
+            const quartos = await res.json();
+            const grid = document.getElementById('grid-quartos');
+            const selectManut = document.getElementById('manut-quarto');
+            
+            grid.innerHTML = '';
+            selectManut.innerHTML = '<option value="">Selecione o quarto...</option>';
 
-  if (!data.ok || !data.resultado.length) {
-    alert('Não foi possível ler o CSV. Verifique o formato do arquivo.');
-    return;
-  }
+            quartos.forEach(q => {
+                const div = document.createElement('div');
+                div.className = `quarto-card status-${q.status.replace('_','')}`;
+                div.innerHTML = `<strong>${q.numero}</strong><br><small>${q.categoria}</small>`;
+                div.onclick = () => openModal(q);
+                grid.appendChild(div);
 
-  dadosImportacao = data.resultado;
+                const opt = document.createElement('option');
+                opt.value = q.numero;
+                opt.textContent = `Apto ${q.numero}`;
+                selectManut.appendChild(opt);
+            });
+        }
 
-  let checkins = 0, checkouts = 0, interditados = 0, matem = 0;
-  let html = '';
+        function openModal(q) {
+            selectedQuarto = q;
+            document.getElementById('modal-title').textContent = `Apto ${q.numero}`;
+            document.getElementById('quarto-info').textContent = `${q.ala} | ${q.categoria}`;
+            
+            const formIn = document.getElementById('form-checkin');
+            const btnOut = document.getElementById('btn-checkout');
 
-  dadosImportacao.forEach(q => {
-    let acaoTexto = '';
-    let acaoClass = '';
-    let detalhe = '';
+            if(q.status === 'ocupado') {
+                formIn.style.display = 'none';
+                btnOut.style.display = 'block';
+            } else {
+                formIn.style.display = 'block';
+                btnOut.style.display = 'none';
+            }
+            
+            document.getElementById('modal-quarto').style.display = 'flex';
+        }
 
-    if (q.acao === 'checkin') {
-      checkins++;
-      acaoTexto = '✅ Check-in';
-      acaoClass = 'acao-checkin';
-      detalhe = q.adultos > 0 ? `${q.adultos} Ad / ${q.criancas} Cr` : '';
-    } else if (q.acao === 'checkout') {
-      checkouts++;
-      acaoTexto = '🚪 Check-out';
-      acaoClass = 'acao-checkout';
-    } else if (q.acao === 'interditado') {
-      interditados++;
-      acaoTexto = '🔧 Interditado';
-      acaoClass = 'acao-interditado';
-    } else {
-      matem++;
-      acaoTexto = '— Sem alteração';
-      acaoClass = 'acao-matem';
-    }
+        function closeModal() {
+            document.getElementById('modal-quarto').style.display = 'none';
+        }
 
-    html += `
-      <div class="resumo-item">
-        <span><strong>Apto ${q.numero}</strong> ${detalhe ? `<small style="color:#888">(${detalhe})</small>` : ''}</span>
-        <span class="${acaoClass}">${acaoTexto}</span>
-      </div>`;
-  });
+        async function doCheckin() {
+            const data = {
+                quarto_numero: selectedQuarto.numero,
+                nome_hospede: document.getElementById('hospede').value,
+                adultos: document.getElementById('adultos').value,
+                criancas: document.getElementById('criancas').value,
+                checkin: new Date().toISOString().split('T')[0],
+                checkout: new Date().toISOString().split('T')[0] // Simplificado
+            };
+            await fetch('/checkin', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            closeModal();
+            loadQuartos();
+        }
 
-  document.getElementById('count-checkin').textContent = checkins;
-  document.getElementById('count-checkout').textContent = checkouts;
-  document.getElementById('count-interditado').textContent = interditados;
-  document.getElementById('count-matem').textContent = matem;
-  document.getElementById('lista-import').innerHTML = html;
-  document.getElementById('resultado-import').style.display = 'block';
-}
+        async function doCheckout() {
+            if(!confirm('Confirmar check-out?')) return;
+            await fetch('/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({quarto_numero: selectedQuarto.numero})
+            });
+            closeModal();
+            loadQuartos();
+        }
 
-async function confirmarImportacao() {
-  if (!dadosImportacao.length) return;
+        async function saveManut() {
+            const data = {
+                quarto_numero: document.getElementById('manut-quarto').value,
+                observacao: document.getElementById('manut-obs').value
+            };
+            await fetch('/manutencao', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            alert('Chamado aberto!');
+            document.getElementById('manut-obs').value = '';
+            loadManut();
+        }
 
-  const res = await fetch('/importar-confirmar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quartos: dadosImportacao })
-  });
+        async function loadManut() {
+            const res = await fetch('/manutencao');
+            const lista = await res.json();
+            const div = document.getElementById('lista-manut');
+            div.innerHTML = lista.map(m => `
+                <div style="padding:10px; border-bottom:1px solid #eee; font-size:13px">
+                    <strong>Apto ${m.quarto_numero}</strong>: ${m.observacao}
+                    <br><small>${m.status === 'resolvido' ? '✅ Resolvido' : '⏳ Pendente'}</small>
+                </div>
+            `).join('');
+        }
 
-  const data = await res.json();
-  if (data.ok) {
-    const msg = document.getElementById('msg-import');
-    msg.textContent = `✅ ${data.total} apartamentos atualizados com sucesso!`;
-    msg.style.display = 'block';
-    document.getElementById('resultado-import').style.display = 'none';
-    document.getElementById('csv-input').value = '';
-    dadosImportacao = [];
-    carregarQuartos();
-    setTimeout(() => msg.style.display = 'none', 4000);
-  }
-}
+        function showTab(tab) {
+            document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).style.display = 'block';
+            event.target.classList.add('active');
+            if(tab === 'manut') loadManut();
+        }
 
-function cancelarImportacao() {
-  document.getElementById('resultado-import').style.display = 'none';
-  document.getElementById('csv-input').value = '';
-  dadosImportacao = [];
-}
-
-async function registrarEnxoval() {
-  const quarto = document.getElementById('quarto-enx').value;
-  const nome = document.getElementById('nome-rec').value;
-  if (!quarto || !nome) { alert('Preencha o apartamento e seu nome!'); return; }
-
-  const itens = [];
-  pecas.forEach((p, i) => {
-    const qtd = parseInt(document.getElementById(`qtd-${i}`).value) || 0;
-    if (qtd > 0) itens.push({ peca: p, saiu: 0, entrou: qtd, danificados: 0, obs_dano: 'Pedido extra pela recepção' });
-  });
-
-  if (!itens.length) { alert('Informe pelo menos uma peça!'); return; }
-
-  const res = await fetch('/enxoval/movimentacao', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quarto_numero: parseInt(quarto), itens, registrado_por: nome, perfil: 'recepcao' })
-  });
-
-  if (res.ok) {
-    const msg = document.getElementById('msg-enxoval');
-    msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 3000);
-    document.getElementById('quarto-enx').value = '';
-    document.getElementById('nome-rec').value = '';
-    montarGridEnxoval();
-  }
-}
-
-async function fazerCheckin() {
-  const quarto = document.getElementById('quarto').value;
-  const nome = document.getElementById('nome').value;
-  const checkin = document.getElementById('checkin').value;
-  const checkout = document.getElementById('checkout').value;
-  if (!quarto || !nome || !checkin || !checkout) { alert('Preencha todos os campos!'); return; }
-
-  const res = await fetch('/checkin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quarto_numero: parseInt(quarto), nome_hospede: nome, checkin, checkout })
-  });
-  if (res.ok) {
-    mostrarMsg('✅ Check-in de ' + nome + ' no apto ' + quarto + ' realizado!');
-    carregarQuartos();
-  }
-}
-
-async function fazerCheckout() {
-  const quarto = document.getElementById('quarto').value;
-  if (!quarto) { alert('Digite o número do apartamento!'); return; }
-  const res = await fetch('/checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quarto_numero: parseInt(quarto) })
-  });
-  if (res.ok) {
-    mostrarMsg('🚪 Check-out do apto ' + quarto + ' realizado!');
-    carregarQuartos();
-  }
-}
-
-function mostrarMsg(texto) {
-  const msg = document.getElementById('msg');
-  msg.textContent = texto;
-  msg.style.display = 'block';
-  setTimeout(() => msg.style.display = 'none', 3000);
-}
-
-function mostrarAba(aba) {
-  ['importar','checkin','enxoval','quartos'].forEach((a, i) => {
-    document.getElementById(`aba-${a}`).style.display = a === aba ? 'block' : 'none';
-    document.querySelectorAll('.tab')[i].classList.toggle('ativo', a === aba);
-  });
-  if (aba === 'quartos' || aba === 'enxoval') carregarQuartos();
-}
-
-carregarQuartos();
-montarGridEnxoval();
-</script>
+        socket.on('update', () => loadQuartos());
+        loadQuartos();
+    </script>
 </body>
 </html>
