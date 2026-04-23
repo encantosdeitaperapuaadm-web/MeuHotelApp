@@ -116,19 +116,19 @@
       if (!perfil) { alert('Selecione um perfil!'); return; }
 
       if (perfil === 'camareira') {
-        const nome = document.getElementById('nome-camareira-login').value;
-        if (!nome) { alert('Selecione seu nome!'); return; }
-        if (!senha) { alert('Digite a senha!'); return; }
-        if (senha === senhas[perfil]) {
-          localStorage.setItem('nomeCamareira', nome);
-          erro.style.display = 'none';
-          window.location.href = 'camareira.html';
-        } else {
-          erro.style.display = 'block';
-          document.getElementById('senha').value = '';
-        }
-        return;
+       const nome = document.getElementById('nome-camareira-login').value;
+      if (!nome) { alert('Selecione seu nome!'); return; }
+      if (!senha) { alert('Digite a senha!'); return; }
+
+      if (senha === senhas[perfil]) {
+      erro.style.display = 'none';
+      window.location.href = 'camareira.html?nome=' + encodeURIComponent(nome);
+      } else {
+      erro.style.display = 'block';
+      document.getElementById('senha').value = '';
       }
+      return;
+    }
 
       if (!senha) { alert('Digite a senha!'); return; }
 
