@@ -205,5 +205,21 @@ app.get('/equipe', (req, res) => {
     });
 });
 
+app.get('/cronometro/andamento', (req, res) => {
+  db.all(`
+    SELECT id, quarto_numero, camareira, tipo_servico, status, segundos_decorridos
+    FROM cronometros
+    WHERE status IN ('em_andamento', 'pausado')
+    ORDER BY id DESC
+  `, [], (err, rows) => {
+    if (err) {
+      console.error('Erro ao buscar cronômetros em andamento:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+
+    res.json(rows || []);
+  });
+});
+
 io.on('connection', (socket) => { console.log('Cliente conectado'); });
 server.listen(3000, () => { console.log('Servidor rodando em http://localhost:3000'); });
