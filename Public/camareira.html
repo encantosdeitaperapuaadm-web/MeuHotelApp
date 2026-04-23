@@ -526,7 +526,7 @@
 
       quartosAla.forEach(q => {
         const cron = getCronometroDoQuarto(q.numero);
-        const emAndamento = !!cron || q.status === 'em_limpeza';
+        const emAndamento = !!cron;
         const desabilitado = q.status === 'interditado' ? 'disabled' : '';
 
         let statusVisual = q.status;
@@ -572,8 +572,10 @@
 
         const aviso = q.status === 'interditado'
           ? 'Quarto interditado. Nenhuma tarefa pode ser iniciada.'
-          : emAndamento
-          ? 'Este quarto já está com limpeza em andamento.'
+          : cron
+          ? 'Este quarto está com cronômetro em andamento.'
+          : q.status === 'em_limpeza'
+          ? 'Quarto marcado como em limpeza, mas sem cronômetro ativo.'
           : 'Escolha a tarefa correta conforme a rotina do dia.';
 
         html += `
