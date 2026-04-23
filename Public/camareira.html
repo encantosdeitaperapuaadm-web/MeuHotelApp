@@ -11,88 +11,129 @@
       font-family: Arial, sans-serif;
       background: #f2f5f9;
       color: #243447;
-      padding: 16px;
+      padding: 12px;
     }
 
     header {
       background: linear-gradient(135deg, #1a3a6b, #2196F3);
       color: white;
       border-radius: 14px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 14px;
       box-shadow: 0 8px 24px rgba(26, 58, 107, 0.18);
     }
 
     .header-info h1 {
-      font-size: 20px;
+      font-size: 18px;
       margin-bottom: 4px;
     }
 
     .header-info p {
-      font-size: 13px;
-      opacity: 0.92;
+      font-size: 12px;
+      opacity: 0.95;
     }
 
     .btn-sair {
       background: rgba(255,255,255,0.18);
       color: white;
       text-decoration: none;
-      padding: 10px 14px;
+      padding: 9px 12px;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 12px;
       white-space: nowrap;
       border: 1px solid rgba(255,255,255,0.25);
     }
 
+    .mensagem {
+      display: none;
+      margin-bottom: 12px;
+      padding: 11px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .msg-sucesso { background: #d4edda; color: #155724; }
+    .msg-erro { background: #f8d7da; color: #721c24; }
+
     .resumo {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     .resumo-card {
       background: white;
       border-radius: 12px;
-      padding: 14px;
+      padding: 10px 8px;
       box-shadow: 0 3px 12px rgba(0,0,0,0.08);
       text-align: center;
     }
 
     .resumo-card strong {
       display: block;
-      font-size: 22px;
+      font-size: 18px;
       color: #1a3a6b;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .resumo-card span {
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
+    }
+
+    .controles {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .ala-box, .filtros-box {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .ala-box label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      color: #1a3a6b;
+      margin-bottom: 6px;
+    }
+
+    .ala-box select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d8dee7;
+      font-size: 13px;
     }
 
     .filtros {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
     }
 
     .filtro-btn {
       border: none;
-      background: white;
+      background: #eef3f8;
       color: #555;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .filtro-btn.ativo {
@@ -101,59 +142,59 @@
     }
 
     .ala-bloco {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .ala-titulo {
       background: #e8f0fb;
       color: #1a3a6b;
       border-left: 5px solid #1a3a6b;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .quartos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
     }
 
     .quarto-card {
       background: white;
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-      border: 2px solid #e8edf3;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e4eaf2;
     }
 
     .quarto-topo {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .quarto-numero {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #1a3a6b;
       line-height: 1;
     }
 
     .quarto-meta {
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
     .badge-status {
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
       white-space: nowrap;
     }
@@ -162,44 +203,62 @@
     .status-ocupado { background: #f8d7da; color: #721c24; }
     .status-em_limpeza { background: #fff3cd; color: #856404; }
     .status-interditado { background: #f3e5f5; color: #4a235a; }
+    .status-pausado { background: #ffe7c2; color: #8a4d00; }
 
     .quarto-info {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 6px;
+      margin-bottom: 8px;
     }
 
     .info-box {
       background: #f7f9fc;
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 9px;
+      padding: 8px;
     }
 
     .info-box small {
       display: block;
-      font-size: 11px;
+      font-size: 10px;
       color: #777;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .info-box strong {
-      font-size: 13px;
+      font-size: 12px;
       color: #243447;
+    }
+
+    .tempo-box {
+      background: #eef6ff;
+      color: #1a3a6b;
+      border-radius: 9px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
     }
 
     .tarefas {
       display: grid;
-      gap: 8px;
+      gap: 6px;
+    }
+
+    .linha-botoes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
     }
 
     .btn-tarefa {
       width: 100%;
       border: none;
-      border-radius: 10px;
-      padding: 11px 12px;
+      border-radius: 9px;
+      padding: 9px 8px;
       color: white;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
     }
@@ -207,6 +266,9 @@
     .btn-limpeza { background: #1a6b3c; }
     .btn-enxoval { background: #e67e22; }
     .btn-checkout { background: #c0392b; }
+    .btn-pausar { background: #8a6d1f; }
+    .btn-retomar { background: #0d6efd; }
+    .btn-finalizar { background: #198754; }
 
     .btn-tarefa:disabled {
       background: #b9c2cc;
@@ -214,42 +276,23 @@
     }
 
     .observacao {
-      margin-top: 10px;
-      font-size: 12px;
+      margin-top: 8px;
+      font-size: 11px;
       color: #666;
-      line-height: 1.4;
+      line-height: 1.35;
       background: #f8fafc;
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 9px;
+      padding: 8px;
     }
 
     .vazio {
       background: white;
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px;
       text-align: center;
       color: #777;
       box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    }
-
-    .mensagem {
-      display: none;
-      margin-bottom: 14px;
-      padding: 12px;
-      border-radius: 10px;
       font-size: 13px;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .msg-sucesso {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .msg-erro {
-      background: #f8d7da;
-      color: #721c24;
     }
 
     @media (max-width: 700px) {
@@ -262,7 +305,11 @@
         text-align: center;
       }
 
-      .quarto-info {
+      .resumo {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quartos-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -272,8 +319,8 @@
   <header>
     <div class="header-info">
       <h1>🧹 Camareiras</h1>
-      <p>Visualize toda a ala, mesmo com quartos limpos, e registre a tarefa correta.</p>
-      <p style="margin-top:6px;font-size:13px;">
+      <p>Escolha a ala, veja todos os quartos e registre a tarefa correta.</p>
+      <p style="margin-top:6px;font-size:12px;">
         👤 Camareira: <strong id="nome-camareira-logada">Não identificada</strong>
       </p>
     </div>
@@ -285,7 +332,7 @@
   <section class="resumo">
     <div class="resumo-card">
       <strong id="total-quartos">0</strong>
-      <span>Total de quartos</span>
+      <span>Total</span>
     </div>
     <div class="resumo-card">
       <strong id="total-ocupados">0</strong>
@@ -293,7 +340,7 @@
     </div>
     <div class="resumo-card">
       <strong id="total-limpando">0</strong>
-      <span>Em limpeza</span>
+      <span>Limpando</span>
     </div>
     <div class="resumo-card">
       <strong id="total-disponiveis">0</strong>
@@ -301,12 +348,27 @@
     </div>
   </section>
 
-  <section class="filtros">
-    <button class="filtro-btn ativo" onclick="aplicarFiltro('todos', this)">Todos</button>
-    <button class="filtro-btn" onclick="aplicarFiltro('ocupado', this)">Ocupados</button>
-    <button class="filtro-btn" onclick="aplicarFiltro('em_limpeza', this)">Limpando</button>
-    <button class="filtro-btn" onclick="aplicarFiltro('disponivel', this)">Disponíveis</button>
-    <button class="filtro-btn" onclick="aplicarFiltro('interditado', this)">Interditados</button>
+  <section class="controles">
+    <div class="ala-box">
+      <label for="select-ala">Ala</label>
+      <select id="select-ala" onchange="alterarAla()">
+        <option value="todas">Todas as alas</option>
+        <option value="Bloco A - Térreo">Bloco A - Térreo</option>
+        <option value="Bloco A - 1º Andar">Bloco A - 1º Andar</option>
+        <option value="Bloco B - Térreo">Bloco B - Térreo</option>
+        <option value="Bloco B - 1º Andar">Bloco B - 1º Andar</option>
+      </select>
+    </div>
+
+    <div class="filtros-box">
+      <div class="filtros">
+        <button class="filtro-btn ativo" onclick="aplicarFiltro('todos', this)">Todos</button>
+        <button class="filtro-btn" onclick="aplicarFiltro('ocupado', this)">Ocupados</button>
+        <button class="filtro-btn" onclick="aplicarFiltro('em_limpeza', this)">Limpando</button>
+        <button class="filtro-btn" onclick="aplicarFiltro('disponivel', this)">Disponíveis</button>
+        <button class="filtro-btn" onclick="aplicarFiltro('interditado', this)">Interditados</button>
+      </div>
+    </div>
   </section>
 
   <div id="lista-alas"></div>
@@ -315,42 +377,21 @@
   <script>
     const socket = io();
     let quartos = [];
+    let cronometros = [];
     let filtroAtual = 'todos';
+    let alaAtual = 'todas';
     let nomeCamareira = '';
 
     function obterNomeCamareira() {
       const params = new URLSearchParams(window.location.search);
       const nomeUrl = params.get('nome');
-
-      if (nomeUrl && nomeUrl.trim()) {
-        return nomeUrl.trim();
-      }
-
-      if (window.nomeCamareiraSelecionada && String(window.nomeCamareiraSelecionada).trim()) {
-        return String(window.nomeCamareiraSelecionada).trim();
-      }
-
+      if (nomeUrl && nomeUrl.trim()) return nomeUrl.trim();
       return '';
     }
 
     function atualizarNomeNoTopo() {
       const el = document.getElementById('nome-camareira-logada');
-      if (!el) return;
       el.textContent = nomeCamareira || 'Não identificada';
-    }
-
-    socket.on('update', () => {
-      carregarQuartos();
-    });
-
-    function traduzirStatus(status) {
-      const mapa = {
-        disponivel: 'Disponível',
-        ocupado: 'Ocupado',
-        em_limpeza: 'Em limpeza',
-        interditado: 'Interditado'
-      };
-      return mapa[status] || status;
     }
 
     function mostrarMensagem(texto, tipo = 'sucesso') {
@@ -358,28 +399,65 @@
       msg.className = 'mensagem ' + (tipo === 'erro' ? 'msg-erro' : 'msg-sucesso');
       msg.textContent = texto;
       msg.style.display = 'block';
-      setTimeout(() => {
-        msg.style.display = 'none';
-      }, 3500);
+      setTimeout(() => msg.style.display = 'none', 3500);
     }
 
-    async function carregarQuartos() {
-      try {
-        const res = await fetch('/quartos');
-        quartos = await res.json();
+    function traduzirStatus(status) {
+      const mapa = {
+        disponivel: 'Disponível',
+        ocupado: 'Ocupado',
+        em_limpeza: 'Em limpeza',
+        interditado: 'Interditado',
+        pausado: 'Pausado'
+      };
+      return mapa[status] || status;
+    }
 
-        atualizarResumo();
-        renderizarQuartos();
-      } catch (err) {
-        mostrarMensagem('Erro ao carregar quartos.', 'erro');
-      }
+    function formatarTempo(segundos) {
+      const h = Math.floor(segundos / 3600);
+      const m = Math.floor((segundos % 3600) / 60);
+      const s = segundos % 60;
+      return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+    }
+
+    function getCronometroDoQuarto(numero) {
+      return cronometros.find(c => Number(c.quarto_numero) === Number(numero)) || null;
+    }
+
+    socket.on('update', () => {
+      carregarTudo();
+    });
+
+    async function carregarTudo() {
+    try {
+      await Promise.all([carregarQuartos(), carregarCronometros()]);
+      atualizarResumo();
+      renderizarQuartos();
+    } catch (err) {
+      mostrarMensagem('Erro ao carregar dados da tela.', 'erro');
+    }
+  }
+
+    async function carregarQuartos() {
+      const res = await fetch('/quartos');
+      quartos = await res.json();
+    }
+
+    async function carregarCronometros() {
+      const res = await fetch('/cronometro/andamento');
+      cronometros = await res.json();
     }
 
     function atualizarResumo() {
-      document.getElementById('total-quartos').textContent = quartos.length;
-      document.getElementById('total-ocupados').textContent = quartos.filter(q => q.status === 'ocupado').length;
-      document.getElementById('total-limpando').textContent = quartos.filter(q => q.status === 'em_limpeza').length;
-      document.getElementById('total-disponiveis').textContent = quartos.filter(q => q.status === 'disponivel').length;
+      const total = quartos.length;
+      const ocupados = quartos.filter(q => q.status === 'ocupado').length;
+      const limpando = quartos.filter(q => q.status === 'em_limpeza').length;
+      const disponiveis = quartos.filter(q => q.status === 'disponivel').length;
+
+      document.getElementById('total-quartos').textContent = total;
+      document.getElementById('total-ocupados').textContent = ocupados;
+      document.getElementById('total-limpando').textContent = limpando;
+      document.getElementById('total-disponiveis').textContent = disponiveis;
     }
 
     function aplicarFiltro(status, botao) {
@@ -389,93 +467,130 @@
       renderizarQuartos();
     }
 
+    function alterarAla() {
+      alaAtual = document.getElementById('select-ala').value;
+      renderizarQuartos();
+    }
+
     function podeExecutarTarefa(quarto) {
-      return quarto.status !== 'interditado';
+      return quarto.status !== 'interditado' && quarto.status !== 'em_limpeza';
     }
 
     function renderizarQuartos() {
-      const container = document.getElementById('lista-alas');
-      const alas = [
-        'Bloco A - Térreo',
-        'Bloco A - 1º Andar',
-        'Bloco B - Térreo',
-        'Bloco B - 1º Andar'
-      ];
+    const container = document.getElementById('lista-alas');
+    const alas = alaAtual === 'todas'
+      ? ['Bloco A - Térreo', 'Bloco A - 1º Andar', 'Bloco B - Térreo', 'Bloco B - 1º Andar']
+      : [alaAtual];
 
-      let html = '';
+    let html = '';
 
-      alas.forEach(ala => {
-        let quartosAla = quartos.filter(q => q.ala === ala);
+    alas.forEach(ala => {
+      let quartosAla = quartos.filter(q => q.ala === ala);
 
-        if (filtroAtual !== 'todos') {
-          quartosAla = quartosAla.filter(q => q.status === filtroAtual);
-        }
-
-        if (!quartosAla.length) return;
-
-        html += `<section class="ala-bloco">
-          <div class="ala-titulo">📍 ${ala}</div>
-          <div class="quartos-grid">`;
-
-        quartosAla.forEach(q => {
-          const desabilitado = !podeExecutarTarefa(q) ? 'disabled' : '';
-          const aviso = q.status === 'interditado'
-            ? 'Quarto interditado. Nenhuma tarefa pode ser iniciada.'
-            : q.status === 'em_limpeza'
-            ? 'Este quarto já está com limpeza em andamento.'
-            : 'Escolha a tarefa correta conforme a rotina do dia.';
-
-          html += `
-            <div class="quarto-card">
-              <div class="quarto-topo">
-                <div>
-                  <div class="quarto-numero">${String(q.numero).padStart(2, '0')}</div>
-                  <div class="quarto-meta">${q.categoria} • ${q.ala}</div>
-                </div>
-                <div class="badge-status status-${q.status}">${traduzirStatus(q.status)}</div>
-              </div>
-
-              <div class="quarto-info">
-                <div class="info-box">
-                  <small>Categoria</small>
-                  <strong>${q.categoria}</strong>
-                </div>
-                <div class="info-box">
-                  <small>Status atual</small>
-                  <strong>${traduzirStatus(q.status)}</strong>
-                </div>
-              </div>
-
-              <div class="tarefas">
-                <button class="btn-tarefa btn-limpeza" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'arrumacao', 'Limpeza do quarto com troca de piso')">
-                  🧹 Limpeza
-                </button>
-                <button class="btn-tarefa btn-enxoval" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'troca_enxoval', 'Limpeza do quarto + troca de enxoval')">
-                  🛏️ Troca de enxoval
-                </button>
-                <button class="btn-tarefa btn-checkout" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'checkout', 'Check-out com limpeza geral e troca total do enxoval')">
-                  🚪 Check-out
-                </button>
-              </div>
-
-              <div class="observacao">${aviso}</div>
-            </div>
-          `;
-        });
-
-        html += `</div></section>`;
-      });
-
-      if (!html) {
-        html = `<div class="vazio">Nenhum quarto encontrado para este filtro.</div>`;
+      if (filtroAtual !== 'todos') {
+        quartosAla = quartosAla.filter(q => q.status === filtroAtual);
       }
 
-      container.innerHTML = html;
+      if (!quartosAla.length) return;
+
+      html += `<section class="ala-bloco">
+        <div class="ala-titulo">📍 ${ala}</div>
+        <div class="quartos-grid">`;
+
+      quartosAla.forEach(q => {
+        const cron = getCronometroDoQuarto(q.numero);
+        const emAndamento = !!cron || q.status === 'em_limpeza';
+        const desabilitado = q.status === 'interditado' ? 'disabled' : '';
+
+        let statusVisual = q.status;
+        if (cron && cron.status === 'pausado') {
+          statusVisual = 'pausado';
+        }
+
+        const tempoHtml = emAndamento
+          ? `<div class="tempo-box">
+              ⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'}${cron ? ' • ' + formatarTempo(cron.segundos_decorridos || 0) : ''}
+            </div>`
+          : '';
+
+        const botoesHtml = emAndamento ? `
+          <div class="tarefas">
+            ${cron
+              ? (
+                  cron.status === 'pausado'
+                    ? `<button class="btn-tarefa btn-retomar" onclick="retomarLimpeza(${cron.id})">▶️ Retomar</button>`
+                    : `<button class="btn-tarefa btn-pausar" onclick="pausarLimpeza(${cron.id})">⏸️ Pausar</button>`
+                )
+              : `<button class="btn-tarefa btn-pausar" disabled>⏸️ Pausar</button>`
+            }
+
+            ${cron
+              ? `<button class="btn-tarefa btn-finalizar" onclick="finalizarLimpeza(${cron.id}, ${q.numero})">✅ Finalizar limpeza</button>`
+              : `<button class="btn-tarefa btn-finalizar" disabled>✅ Finalizar limpeza</button>`
+            }
+          </div>
+        ` : `
+          <div class="tarefas">
+            <button class="btn-tarefa btn-limpeza" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'arrumacao', 'Limpeza do quarto com troca de piso')">
+              🧹 Limpeza
+            </button>
+            <button class="btn-tarefa btn-enxoval" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'troca_enxoval', 'Limpeza do quarto + troca de enxoval')">
+              🛏️ Troca de enxoval
+            </button>
+            <button class="btn-tarefa btn-checkout" ${desabilitado} onclick="registrarTarefa(${q.numero}, 'checkout', 'Check-out com limpeza geral e troca total do enxoval')">
+              🚪 Check-out
+            </button>
+          </div>
+        `;
+
+        const aviso = q.status === 'interditado'
+          ? 'Quarto interditado. Nenhuma tarefa pode ser iniciada.'
+          : emAndamento
+          ? 'Este quarto já está com limpeza em andamento.'
+          : 'Escolha a tarefa correta conforme a rotina do dia.';
+
+        html += `
+          <div class="quarto-card">
+            <div class="quarto-topo">
+              <div>
+                <div class="quarto-numero">${String(q.numero).padStart(2, '0')}</div>
+                <div class="quarto-meta">${q.categoria}</div>
+              </div>
+              <div class="badge-status status-${statusVisual}">${traduzirStatus(statusVisual)}</div>
+            </div>
+
+            <div class="quarto-info">
+              <div class="info-box">
+                <small>Categoria</small>
+                <strong>${q.categoria}</strong>
+              </div>
+              <div class="info-box">
+                <small>Status</small>
+                <strong>${traduzirStatus(statusVisual)}</strong>
+              </div>
+            </div>
+
+            ${tempoHtml}
+            ${botoesHtml}
+
+            <div class="observacao">${aviso}</div>
+          </div>
+        `;
+      });
+
+      html += `</div></section>`;
+    });
+
+    if (!html) {
+      html = `<div class="vazio">Nenhum quarto encontrado para esta ala/filtro.</div>`;
     }
+
+    container.innerHTML = html;
+  }
 
     async function registrarTarefa(numero, tipo, descricao) {
       if (!nomeCamareira) {
-        mostrarMensagem('Camareira não identificada. Volte ao login e entre novamente.', 'erro');
+        mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
         return;
       }
 
@@ -495,7 +610,7 @@
         const retornoCronometro = await resCronometro.json();
 
         if (!resCronometro.ok) {
-          mostrarMensagem(retornoCronometro.error || 'Não foi possível iniciar a tarefa.', 'erro');
+          mostrarMensagem(retornoCronometro.error || 'Não foi possível iniciar.', 'erro');
           return;
         }
 
@@ -520,20 +635,93 @@
         const retornoRegistro = await resRegistro.json();
 
         if (!resRegistro.ok) {
-          mostrarMensagem(retornoRegistro.error || 'Cronômetro iniciado, mas falhou ao registrar tarefa.', 'erro');
+          mostrarMensagem(retornoRegistro.error || 'Falha ao registrar tarefa.', 'erro');
           return;
         }
 
-        mostrarMensagem(`Tarefa iniciada no apto ${numero}: ${descricao}`);
-        carregarQuartos();
+        mostrarMensagem(`Tarefa iniciada no apto ${numero}`);
+        carregarTudo();
       } catch (err) {
         mostrarMensagem('Erro ao registrar tarefa.', 'erro');
       }
     }
 
+    async function pausarLimpeza(id) {
+      try {
+        const res = await fetch('/cronometro/pausar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          mostrarMensagem(data.error || 'Erro ao pausar.', 'erro');
+          return;
+        }
+
+        mostrarMensagem('Limpeza pausada.');
+        carregarTudo();
+      } catch (err) {
+        mostrarMensagem('Erro ao pausar limpeza.', 'erro');
+      }
+    }
+
+    async function retomarLimpeza(id) {
+      const tempoPausa = prompt('Quantos minutos ficou pausado?');
+      if (tempoPausa === null) return;
+
+      try {
+        const res = await fetch('/cronometro/retomar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id,
+            tempo_pausa: parseInt(tempoPausa) || 0
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          mostrarMensagem(data.error || 'Erro ao retomar.', 'erro');
+          return;
+        }
+
+        mostrarMensagem('Limpeza retomada.');
+        carregarTudo();
+      } catch (err) {
+        mostrarMensagem('Erro ao retomar limpeza.', 'erro');
+      }
+    }
+
+    async function finalizarLimpeza(id, quartoNumero) {
+      try {
+        const res = await fetch('/cronometro/finalizar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id,
+            quarto_numero: quartoNumero
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          mostrarMensagem(data.error || 'Erro ao finalizar.', 'erro');
+          return;
+        }
+
+        mostrarMensagem(`Limpeza finalizada. Tempo: ${data.duracao} min`);
+        carregarTudo();
+      } catch (err) {
+        mostrarMensagem('Erro ao finalizar limpeza.', 'erro');
+      }
+    }
+
     nomeCamareira = obterNomeCamareira();
     atualizarNomeNoTopo();
-    carregarQuartos();
+    carregarTudo();
+    setInterval(carregarTudo, 10000);
   </script>
 </body>
 </html>
