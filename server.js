@@ -207,9 +207,9 @@ app.get('/equipe', (req, res) => {
 
 app.get('/cronometro/andamento', (req, res) => {
   db.all(`
-    SELECT id, quarto_numero, camareira, tipo_servico, status, segundos_decorridos
-    FROM cronometros
-    WHERE status IN ('em_andamento', 'pausado')
+    SELECT id, quarto_numero, camareira, tipo_servico, status
+    FROM limpeza_cronometro
+    WHERE fim IS NULL AND (status IS NULL OR status != 'concluido')
     ORDER BY id DESC
   `, [], (err, rows) => {
     if (err) {
