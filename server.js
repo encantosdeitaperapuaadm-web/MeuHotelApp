@@ -205,11 +205,44 @@ app.get('/equipe', (req, res) => {
     });
 });
 
+app.post('/reset-governanca', (req, res) => {
+  db.serialize(() => {
+    db.run(`UPDATE quartos SET status='disponivel' WHERE status='em_limpeza'`);
+    db.run(`
+      UPDATE limpeza_cronometro
+      SET fim = CURRENT_TIMESTAMP,
+          status = 'concluido'
+      WHERE fim IS NULL
+    `, function(err) {
+      if (err) {
+        console.error('Erro ao resetar governança:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+
+      io.emit('update', 'reset-governanca');
+      res.json({ ok: true, message: 'Governança resetada com sucesso.' });
+    });
+  });
+});
+
 app.get('/cronometro/andamento', (req, res) => {
   db.all(`
-    SELECT id, quarto_numero, camareira, tipo_servico, status
+    SELECT
+      id,
+      quarto_numero,
+      camareira,
+      tipo_servico,
+      inicio,
+      COALESCE(status, 'em_andamento') AS status,
+      CASE
+        WHEN COALESCE(status, 'em_andamento') = 'pausado' THEN COALESCE(segundos_decorridos, 0)
+        ELSE CAST(
+          (strftime('%s','now') - strftime('%s', inicio)) - COALESCE(tempo_pausa_segundos, 0)
+          AS INTEGER
+        )
+      END AS segundos_decorridos
     FROM limpeza_cronometro
-    WHERE fim IS NULL AND (status IS NULL OR status != 'concluido')
+    WHERE fim IS NULL
     ORDER BY id DESC
   `, [], (err, rows) => {
     if (err) {
@@ -218,6 +251,52 @@ app.get('/cronometro/andamento', (req, res) => {
     }
 
     res.json(rows || []);
+  });
+});
+
+app.post('/cronometro/pausar/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.run(`
+    UPDATE limpeza_cronometro
+    SET
+      status = 'pausado',
+      inicio_pausa = CURRENT_TIMESTAMP,
+      segundos_decorridos = CAST(
+        (strftime('%s','now') - strftime('%s', inicio)) - COALESCE(tempo_pausa_segundos, 0)
+        AS INTEGER
+      )
+    WHERE id = ? AND fim IS NULL
+  `, [id], function(err) {
+    if (err) {
+      console.error('Erro ao pausar cronômetro:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+
+    io.emit('update', 'cronometro-pausado');
+    res.json({ ok: true, message: 'Cronômetro pausado com sucesso.' });
+  });
+});
+
+app.post('/cronometro/retomar/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.run(`
+    UPDATE limpeza_cronometro
+    SET
+      tempo_pausa_segundos = COALESCE(tempo_pausa_segundos, 0) +
+        CAST((strftime('%s','now') - strftime('%s', inicio_pausa)) AS INTEGER),
+      inicio_pausa = NULL,
+      status = 'em_andamento'
+    WHERE id = ? AND fim IS NULL
+  `, [id], function(err) {
+    if (err) {
+      console.error('Erro ao retomar cronômetro:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+
+    io.emit('update', 'cronometro-retomado');
+    res.json({ ok: true, message: 'Cronômetro retomado com sucesso.' });
   });
 });
 
