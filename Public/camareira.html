@@ -397,9 +397,22 @@
     let nomeCamareira = '';
 
     function obterNomeCamareira() {
+      // 1. Tentar pegar da URL primeiro
       const params = new URLSearchParams(window.location.search);
       const nomeUrl = params.get('nome');
-      if (nomeUrl && nomeUrl.trim()) return nomeUrl.trim();
+      if (nomeUrl && nomeUrl.trim()) {
+        // Se veio da URL, salvar no localStorage
+        localStorage.setItem('nomeCamareira', nomeUrl.trim());
+        return nomeUrl.trim();
+      }
+      
+      // 2. Se não veio da URL, tentar pegar do localStorage
+      const nomeSalvo = localStorage.getItem('nomeCamareira');
+      if (nomeSalvo && nomeSalvo.trim()) {
+        return nomeSalvo.trim();
+      }
+      
+      // 3. Se não tem nenhum, retornar vazio
       return '';
     }
 
