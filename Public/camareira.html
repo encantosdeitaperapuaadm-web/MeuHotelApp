@@ -168,6 +168,15 @@
       padding: 10px;
       box-shadow: 0 3px 12px rgba(0,0,0,0.08);
       border: 1px solid #e4eaf2;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tarefas {
+      display: grid;
+      gap: 6px;
+      position: relative;
+      z-index: 5;
     }
 
     .quarto-topo {
@@ -261,6 +270,9 @@
       font-size: 12px;
       font-weight: bold;
       cursor: pointer;
+      position: relative;
+      z-index: 10;
+      pointer-events: auto;
     }
 
     .btn-limpeza { background: #1a6b3c; }
@@ -283,6 +295,8 @@
       background: #f8fafc;
       border-radius: 9px;
       padding: 8px;
+      position: relative;
+      z-index: 1;
     }
 
     .vazio {
@@ -429,14 +443,22 @@
     });
 
     async function carregarTudo() {
-    try {
-      await Promise.all([carregarQuartos(), carregarCronometros()]);
+      try {
+        await carregarQuartos();
+      } catch (err) {
+        mostrarMensagem('Erro ao carregar quartos.', 'erro');
+        return;
+      }
+
+      try {
+        await carregarCronometros();
+      } catch (err) {
+        cronometros = [];
+      }
+
       atualizarResumo();
       renderizarQuartos();
-    } catch (err) {
-      mostrarMensagem('Erro ao carregar dados da tela.', 'erro');
     }
-  }
 
     async function carregarQuartos() {
       const res = await fetch('/quartos');
@@ -445,6 +467,11 @@
 
     async function carregarCronometros() {
       const res = await fetch('/cronometro/andamento');
+
+      if (!res.ok) {
+        throw new Error('Erro ao carregar cronômetros');
+      }
+
       cronometros = await res.json();
     }
 
@@ -722,6 +749,11 @@
     atualizarNomeNoTopo();
     carregarTudo();
     setInterval(carregarTudo, 10000);
+
+    window.registrarTarefa = registrarTarefa;
+    window.pausarLimpeza = pausarLimpeza;
+    window.retomarLimpeza = retomarLimpeza;
+    window.finalizarLimpeza = finalizarLimpeza;
   </script>
 </body>
 </html>
