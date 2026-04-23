@@ -548,12 +548,12 @@
                     ? `<button class="btn-tarefa btn-retomar" onclick="retomarLimpeza(${cron.id})">▶️ Retomar</button>`
                     : `<button class="btn-tarefa btn-pausar" onclick="pausarLimpeza(${cron.id})">⏸️ Pausar</button>`
                 )
-              : `<button class="btn-tarefa btn-pausar" disabled>⏸️ Pausar</button>`
+              : `<button class="btn-tarefa btn-pausar" onclick="mostrarMensagem('Cronômetro não encontrado para este quarto.', 'erro')">⏸️ Pausar</button>`
             }
 
             ${cron
               ? `<button class="btn-tarefa btn-finalizar" onclick="finalizarLimpeza(${cron.id}, ${q.numero})">✅ Finalizar limpeza</button>`
-              : `<button class="btn-tarefa btn-finalizar" disabled>✅ Finalizar limpeza</button>`
+              : `<button class="btn-tarefa btn-finalizar" onclick="mostrarMensagem('Cronômetro não encontrado para este quarto.', 'erro')">✅ Finalizar limpeza</button>`
             }
           </div>
         ` : `
