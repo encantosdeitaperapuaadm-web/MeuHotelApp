@@ -441,11 +441,18 @@
     }
 
     function formatarTempo(segundos) {
-      const h = Math.floor(segundos / 3600);
-      const m = Math.floor((segundos % 3600) / 60);
-      const s = segundos % 60;
-      return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+      segundos = Number(segundos);
+
+      if (!Number.isFinite(segundos) || segundos < 0) {
+        segundos = 0;
     }
+
+  const h = Math.floor(segundos / 3600);
+  const m = Math.floor((segundos % 3600) / 60);
+  const s = Math.floor(segundos % 60);
+
+  return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+}
 
     function getCronometroDoQuarto(numero) {
       return cronometros.find(c => Number(c.quarto_numero) === Number(numero)) || null;
@@ -486,6 +493,7 @@
       }
 
       cronometros = await res.json();
+      console.log('cronometros:', cronometros);
     }
 
     function atualizarResumo() {
@@ -547,9 +555,14 @@
           statusVisual = 'pausado';
         }
 
+        const inicioMs = cron && cron.inicio ? Date.parse(cron.inicio) : NaN;
+        const segundosAoVivo = Number.isFinite(inicioMs)
+          ? Math.floor((Date.now() - inicioMs) / 1000)
+          : 0;
+
         const tempoHtml = emAndamento
           ? `<div class="tempo-box">
-              ⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'}${cron ? ' • ' + formatarTempo(cron.segundos_decorridos || 0) : ''}
+              ⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} • ${formatarTempo(cron.segundos_decorridos || 0)}
             </div>`
           : '';
 
@@ -688,15 +701,14 @@
       }
     }
 
-    async function pausarLimpeza(id) {
+   async function pausarLimpeza(id) {
       try {
-        const res = await fetch('/cronometro/pausar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
+        const res = await fetch(`/cronometro/pausar/${id}`, {
+          method: 'POST'
         });
 
         const data = await res.json();
+
         if (!res.ok) {
           mostrarMensagem(data.error || 'Erro ao pausar.', 'erro');
           return;
@@ -710,20 +722,13 @@
     }
 
     async function retomarLimpeza(id) {
-      const tempoPausa = prompt('Quantos minutos ficou pausado?');
-      if (tempoPausa === null) return;
-
       try {
-        const res = await fetch('/cronometro/retomar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id,
-            tempo_pausa: parseInt(tempoPausa) || 0
-          })
+        const res = await fetch(`/cronometro/retomar/${id}`, {
+          method: 'POST'
         });
 
         const data = await res.json();
+
         if (!res.ok) {
           mostrarMensagem(data.error || 'Erro ao retomar.', 'erro');
           return;
@@ -760,15 +765,19 @@
       }
     }
 
-    nomeCamareira = obterNomeCamareira();
-    atualizarNomeNoTopo();
-    carregarTudo();
-    setInterval(carregarTudo, 10000);
+   
 
-    window.registrarTarefa = registrarTarefa;
-    window.pausarLimpeza = pausarLimpeza;
-    window.retomarLimpeza = retomarLimpeza;
-    window.finalizarLimpeza = finalizarLimpeza;
+    nomeCamareira = obterNomeCamareira();
+  atualizarNomeNoTopo();
+  carregarTudo();
+
+  setInterval(carregarTudo, 1000);
+
+  window.registrarTarefa = registrarTarefa;
+  window.pausarLimpeza = pausarLimpeza;
+  window.retomarLimpeza = retomarLimpeza;
+  window.finalizarLimpeza = finalizarLimpeza;
+
   </script>
 </body>
 </html>
