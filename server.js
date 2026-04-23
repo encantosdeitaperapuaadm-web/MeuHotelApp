@@ -19,6 +19,18 @@ app.use(express.json());
 
 const db = new sqlite3.Database('hotel.db');
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS limpezas_quartos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quarto_numero INTEGER NOT NULL,
+    camareira_nome TEXT NOT NULL,
+    tipo_servico TEXT NOT NULL,
+    detalhes_enxoval TEXT DEFAULT '',
+    data TEXT NOT NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 // ==================== QUARTOS ====================
 app.get('/quartos', (req, res) => {
     // Suporte a prioridade na ordenação
