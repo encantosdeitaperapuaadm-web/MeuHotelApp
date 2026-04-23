@@ -598,6 +598,8 @@
 
         const aviso = q.status === 'interditado'
           ? 'Quarto interditado. Nenhuma tarefa pode ser iniciada.'
+          : cron && cron.status === 'pausado'
+          ? 'Este quarto está com cronômetro pausado.'
           : cron
           ? 'Este quarto está com cronômetro em andamento.'
           : q.status === 'em_limpeza'
