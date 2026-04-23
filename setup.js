@@ -173,6 +173,56 @@ db.run(`CREATE TABLE IF NOT EXISTS equipe (
   )
 `);
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS limpeza_cronometro (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quarto_numero INTEGER,
+    ala TEXT,
+    categoria TEXT,
+    camareira TEXT,
+    tipo_servico TEXT,
+    inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fim DATETIME,
+    duracao_minutos INTEGER,
+    tempo_pausa_minutos INTEGER DEFAULT 0,
+    segundos_decorridos INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'em_andamento'
+  )
+`);
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN segundos_decorridos INTEGER DEFAULT 0`, (err) => {
+  if (err) console.log('ALTER segundos_decorridos:', err.message);
+  else console.log('Coluna segundos_decorridos criada com sucesso.');
+});
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN segundos_decorridos INTEGER DEFAULT 0`, (err) => {
+  if (err) {
+    console.log('ALTER segundos_decorridos:', err.message);
+  } else {
+    console.log('Coluna segundos_decorridos criada com sucesso.');
+  }
+});
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN inicio_pausa DATETIME`, (err) => {
+  if (err) console.log('ALTER inicio_pausa:', err.message);
+  else console.log('Coluna inicio_pausa criada com sucesso.');
+});
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN tempo_pausa_segundos INTEGER DEFAULT 0`, (err) => {
+  if (err) console.log('ALTER tempo_pausa_segundos:', err.message);
+  else console.log('Coluna tempo_pausa_segundos criada com sucesso.');
+});
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN inicio_pausa DATETIME`, (err) => {
+  if (err) console.log('ALTER inicio_pausa:', err.message);
+  else console.log('Coluna inicio_pausa criada com sucesso.');
+});
+
+db.run(`ALTER TABLE limpeza_cronometro ADD COLUMN tempo_pausa_segundos INTEGER DEFAULT 0`, (err) => {
+  if (err) console.log('ALTER tempo_pausa_segundos:', err.message);
+  else console.log('Coluna tempo_pausa_segundos criada com sucesso.');
+});
+
 // Camareiras iniciais
 db.run(`INSERT OR IGNORE INTO equipe (nome, cargo) VALUES ('Flávia', 'camareira')`);
 db.run(`INSERT OR IGNORE INTO equipe (nome, cargo) VALUES ('Renata', 'camareira')`);
