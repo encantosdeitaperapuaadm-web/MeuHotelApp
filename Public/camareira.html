@@ -378,8 +378,7 @@
         <option value="todas">Todas as alas</option>
         <option value="Bloco A - Térreo">Bloco A - Térreo</option>
         <option value="Bloco A - 1º Andar">Bloco A - 1º Andar</option>
-        <option value="Bloco B - Térreo">Bloco B - Térreo</option>
-        <option value="Bloco B - 1º Andar">Bloco B - 1º Andar</option>
+        <option value="Bloco B">Bloco B</option>
       </select>
     </div>
 
@@ -536,7 +535,7 @@
     function renderizarQuartos() {
     const container = document.getElementById('lista-alas');
     const alas = alaAtual === 'todas'
-      ? ['Bloco A - Térreo', 'Bloco A - 1º Andar', 'Bloco B - Térreo', 'Bloco B - 1º Andar']
+      ? ['Bloco A - Térreo', 'Bloco A - 1º Andar', 'Bloco B']
       : [alaAtual];
 
     let html = '';
