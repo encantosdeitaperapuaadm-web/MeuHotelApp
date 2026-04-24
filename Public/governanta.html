@@ -912,10 +912,11 @@ function mostrarAba(aba) {
   if (aba === 'quartos') carregarQuartos();
   if (aba === 'lavanderia') carregarLavanderia();
   if (aba === 'manutencao') carregarManutencao();
-  if (aba === 'limpeza' && cronometroAtivo) verificarCronometroAtivo();
+  if (aba === 'limpeza') carregarTudoGov();
 }
 
 carregarQuartos();
+carregarTudoGov();
 setTimeout(() => verificarCronometroAtivo(), 500);
 
 document.addEventListener('visibilitychange', () => {
