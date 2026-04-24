@@ -114,41 +114,28 @@
 
 <!-- ABA LIMPEZA -->
 <div id="aba-limpeza">
-  <div style="display:none" id="box-cronometro-ativo">
-    <div class="cronometro-box">
-      <h3>⏱️ Limpeza em andamento</h3>
-      <div class="cronometro-tempo" id="tempo-display">00:00</div>
-      <div class="cronometro-info" id="info-cronometro">Apto - Governanta</div>
-      <button style="background:rgba(255,255,255,0.2);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="finalizarCronometro()">⏹️ Finalizar</button>
-      <button id="btn-pausa" style="background:rgba(255,165,0,0.4);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="togglePausa()">⏸️ Pausar</button>
-      <button style="background:rgba(255,0,0,0.3);border:2px solid white;margin-top:5px;width:auto;padding:10px 20px" onclick="cancelarCronometro()">❌ Cancelar</button>
-    </div>
-  </div>
 
-  <div class="card" id="card-iniciar">
-    <h2>▶️ Iniciar Limpeza</h2>
-    <input type="text" id="nome-camareira" style="display:none" value="Vanessa">
-    <p style="color:#6b4c1a;font-weight:bold;padding:8px 0">👑 Olá, Vanessa!</p>
-    <select id="quarto-cron">
-      <option value="">Selecione o apartamento...</option>
-    </select>
-    <select id="tipo-servico-cron">
-      <option value="limpeza">Limpeza</option>
-      <option value="saida">Limpeza de Saída</option>
-    </select>
-    <button class="btn-laranja" onclick="iniciarCronometro()">▶️ Iniciar Limpeza</button>
-    <div class="mensagem msg-laranja" id="msg-cron"></div>
-  </div>
-
-  <div class="card" id="card-checklist" style="display:none">
-    <h2 id="titulo-checklist">Checklist</h2>
-    <div class="progresso">
-      <div class="progresso-bar" id="barra" style="width:0%"></div>
+  <section class="controles">
+    <div class="ala-box">
+      abel for="select-ala-gov">Ala</label>
+      <select id="select-ala-gov" onchange="alterarAlaGov()">
+        <option value="todas">Todas as alas</option>
+        <option value="Bloco A - Térreo">Bloco A - Térreo</option>
+        <option value="Bloco A - 1º Andar">Bloco A - 1º Andar</option>
+        <option value="Bloco B">Bloco B</option>
+      </select>
     </div>
-    <div class="progresso-texto" id="texto-progresso">0 de 0 tarefas</div>
-    <ul class="checklist" id="checklist"></ul>
-    <div class="mensagem msg-verde" id="msg-limpeza">Limpeza finalizada!</div>
-  </div>
+    <div class="filtros">
+      <button class="filtro-btn-gov ativo" onclick="aplicarFiltroGov('todos', this)">Todos</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('ocupado', this)">Ocupados</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('em_limpeza', this)">Limpando</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('disponivel', this)">Disponíveis</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('interditado', this)">Interditados</button>
+    </div>
+  </section>
+
+  <div id="lista-alas-gov">Carregando...</div>
+
 </div>
 
 <!-- ABA QUARTOS -->
@@ -260,6 +247,164 @@ function formatarData(dt) {
   const d = new Date(dt);
   return d.toLocaleDateString('pt-BR') + ' ' + d.toTimeString().slice(0,5);
 }
+
+// ===== NOVA ABA LIMPEZA =====
+
+function getCronometroDoQuarto(numero) {
+  return cronometros.find(c => c.quarto_numero === numero && c.status !== 'finalizado');
+}
+
+function formatarTempo(segundos) {
+  const m = Math.floor(segundos / 60).toString().padStart(2, '0');
+  const s = (segundos % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function traduzirStatus(s) {
+  return { disponivel: 'Disponível', ocupado: 'Ocupado', em_limpeza: 'Em limpeza', interditado: 'Interditado', pausado: 'Pausado' }[s] || s;
+}
+
+function alterarAlaGov() {
+  alaAtual = document.getElementById('select-ala-gov').value;
+  renderizarQuartosGov();
+}
+
+function aplicarFiltroGov(status, botao) {
+  filtroAtual = status;
+  document.querySelectorAll('.filtro-btn-gov').forEach(b => b.classList.remove('ativo'));
+  botao.classList.add('ativo');
+  renderizarQuartosGov();
+}
+
+function renderizarQuartosGov() {
+  const container = document.getElementById('lista-alas-gov');
+  const alas = alaAtual === 'todas'
+    ? ['Bloco A - Térreo', 'Bloco A - 1º Andar', 'Bloco B']
+    : [alaAtual];
+
+  let html = '';
+
+  alas.forEach(ala => {
+    let quartosAla = quartos.filter(q => q.ala === ala);
+    if (filtroAtual !== 'todos') {
+      quartosAla = quartosAla.filter(q => q.status === filtroAtual);
+    }
+    if (!quartosAla.length) return;
+
+    html += `<section class="ala-bloco">
+      <div class="ala-titulo">📍 ${ala}</div>
+      <div class="quartos-grid">`;
+
+    quartosAla.forEach(q => {
+      const cron = getCronometroDoQuarto(q.numero);
+      const emAndamento = !!cron;
+      const desabilitado = q.status === 'interditado' ? 'disabled' : '';
+      let statusVisual = q.status;
+      if (cron && cron.status === 'pausado') statusVisual = 'pausado';
+
+      const tempoHtml = emAndamento
+        ? `<div class="tempo-box">⏱️ ${cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} • ${formatarTempo(cron.segundos_decorridos || 0)}</div>`
+        : '';
+
+      const botoesHtml = emAndamento ? `
+        <div class="tarefas">
+          ${cron.status === 'pausado'
+            ? `<button class="btn-tarefa btn-retomar" onclick="retomarLimpezaGov(${cron.id})">▶️ Retomar</button>`
+            : `<button class="btn-tarefa btn-pausar" onclick="pausarLimpezaGov(${cron.id})">⏸️ Pausar</button>`}
+          <button class="btn-tarefa btn-finalizar" onclick="finalizarLimpezaGov(${cron.id}, ${q.numero})">✅ Finalizar</button>
+        </div>` : `
+        <div class="tarefas">
+          <button class="btn-tarefa btn-limpeza" ${desabilitado} onclick="registrarTarefaGov(${q.numero}, 'arrumacao')">🧹 Limpeza</button>
+          <button class="btn-tarefa btn-enxoval" ${desabilitado} onclick="registrarTarefaGov(${q.numero}, 'troca_enxoval')">🛏️ Troca de enxoval</button>
+          <button class="btn-tarefa btn-checkout" ${desabilitado} onclick="confirmarTarefaGov(${q.numero}, 'checkout')">🚪 Check-out</button>
+          <button class="btn-tarefa btn-dispensa" ${desabilitado} onclick="confirmarTarefaGov(${q.numero}, 'dispensa')">🙅 Dispensa</button>
+        </div>`;
+
+      html += `
+        <div class="quarto-card">
+          <div class="quarto-topo">
+            <div>
+              <div class="quarto-numero">${String(q.numero).padStart(2, '0')}</div>
+              <div class="quarto-meta">${q.categoria}</div>
+            </div>
+            <div class="badge-status status-${statusVisual}">${traduzirStatus(statusVisual)}</div>
+          </div>
+          ${tempoHtml}
+          ${botoesHtml}
+        </div>`;
+    });
+
+    html += `</div></section>`;
+  });
+
+  if (!html) html = `<div class="vazio">Nenhum quarto encontrado.</div>`;
+  container.innerHTML = html;
+}
+
+async function registrarTarefaGov(numero, tipo) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  try {
+    const resCron = await fetch('/cronometro/iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quarto_numero: numero, camareira: nomeGov, tipo_servico: tipo })
+    });
+    if (!resCron.ok) { mostrarMensagem('Não foi possível iniciar.', 'erro'); return; }
+
+    await fetch('/limpeza-quarto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quarto_numero: numero, camareira_nome: nomeGov,
+        tipo_servico: tipo, detalhes_enxoval: '',  data: hoje
+      })
+    });
+    mostrarMensagem(`Tarefa iniciada no apto ${numero}`);
+    await carregarTudoGov();
+  } catch { mostrarMensagem('Erro ao registrar.', 'erro'); }
+}
+
+async function confirmarTarefaGov(numero, tipo) {
+  const nomes = { checkout: 'Check-out', dispensa: 'Dispensa' };
+  if (!confirm(`Confirmar "${nomes[tipo]}" no quarto ${String(numero).padStart(2,'0')}?`)) return;
+  if (tipo === 'dispensa') {
+    const hoje = new Date().toISOString().slice(0, 10);
+    await fetch('/limpeza-quarto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quarto_numero: numero, camareira_nome: nomeGov, tipo_servico: 'dispensa', detalhes_enxoval: 'Hóspede dispensou limpeza', data: hoje })
+    });
+    mostrarMensagem(`Dispensa registrada no apto ${numero}`);
+    await carregarTudoGov();
+    return;
+  }
+  await registrarTarefaGov(numero, tipo);
+}
+
+async function pausarLimpezaGov(id) {
+  await fetch(`/cronometro/pausar/${id}`, { method: 'POST' });
+  await carregarTudoGov();
+}
+
+async function retomarLimpezaGov(id) {
+  await fetch(`/cronometro/retomar/${id}`, { method: 'POST' });
+  await carregarTudoGov();
+}
+
+async function finalizarLimpezaGov(id, numero) {
+  if (!confirm(`Finalizar limpeza do quarto ${String(numero).padStart(2,'0')}?`)) return;
+  await fetch(`/cronometro/finalizar/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quarto_numero: numero }) });
+  mostrarMensagem(`Quarto ${numero} finalizado!`);
+  await carregarTudoGov();
+}
+
+async function carregarTudoGov() {
+  const [rQ, rC] = await Promise.all([fetch('/quartos'), fetch('/cronometro/andamento')]);
+  quartos = await rQ.json();
+  cronometros = await rC.json();
+  renderizarQuartosGov();
+}
+// ===== FIM NOVA ABA LIMPEZA =====
 
 async function carregarQuartos() {
   const res = await fetch('/quartos');
