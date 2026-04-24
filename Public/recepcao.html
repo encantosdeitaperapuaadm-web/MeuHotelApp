@@ -238,7 +238,7 @@
   };
 
   container.innerHTML = dados.map(d => {
-    const hora = new Date(d.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const hora = d.data || '';
     const icone = icones[d.tipo_servico] || '📌';
     const nome = nomes[d.tipo_servico] || d.tipo_servico;
     return `
