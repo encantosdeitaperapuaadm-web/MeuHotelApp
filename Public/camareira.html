@@ -281,6 +281,15 @@
     .btn-pausar { background: #8a6d1f; }
     .btn-retomar { background: #0d6efd; }
     .btn-finalizar { background: #198754; }
+    .btn-dispensa {
+      background: #b45309;
+      color: #fff;
+      border: none;
+    }
+
+    .btn-dispensa:hover {
+      background: #92400e;
+    }
 
     .btn-tarefa:disabled {
       background: #b9c2cc;
@@ -652,69 +661,38 @@
   }
 
     async function registrarTarefa(numero, tipo, descricao) {
-      if (!nomeCamareira) {
-        mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
-        return;
-      }
-
-      const hoje = new Date().toISOString().slice(0, 10);
-
-      async function registrarTarefa(numero, tipo, descricao) {
-  if (!nomeCamareira) {
-    mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
-    return;
-  }
+    if (!nomeCamareira) {
+      mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
+      return;
+    }
 
   const hoje = new Date().toISOString().slice(0, 10);
 
   try {
     if (tipo === 'dispensa') {
-      const resDispensa = await fetch('/tarefas', {
+      const resDispensa = await fetch('/limpeza-quarto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quarto_numero: numero,
-          camareira: nomeCamareira,
-          data: hoje,
-          tipo: 'dispensa_limpeza',
-          descricao: descricao || 'Hóspede dispensou limpeza'
+          camareira_nome: nomeCamareira,
+          tipo_servico: 'dispensa',
+          detalhes_enxoval: descricao || 'Hóspede dispensou limpeza',
+          data: hoje
         })
       });
 
-      const dataDispensa = await resDispensa.json();
+      const retornoDispensa = await resDispensa.json();
 
       if (!resDispensa.ok) {
-        throw new Error(dataDispensa.error || 'Erro ao registrar dispensa de limpeza.');
+        mostrarMensagem(retornoDispensa.error || 'Erro ao registrar dispensa de limpeza.', 'erro');
+        return;
       }
 
-      mostrarMensagem(`Quarto ${numero} dispensou limpeza.`, 'sucesso');
-      await carregarQuartos();
+      mostrarMensagem(`Dispensa registrada no apto ${numero}`);
+      carregarTudo();
       return;
     }
-
-    if (tipo === 'dispensa') {
-  const resDispensa = await fetch('/limpeza-quarto', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      quarto_numero: numero,
-      camareira_nome: nomeCamareira,
-      tipo_servico: 'dispensa',
-      detalhes_enxoval: descricao || 'Hóspede dispensou limpeza',
-      data: hoje
-    })
-  });
-
-  const dataDispensa = await resDispensa.json();
-
-  if (!resDispensa.ok) {
-    throw new Error(dataDispensa.error || 'Erro ao registrar dispensa de limpeza.');
-  }
-
-  mostrarMensagem(`Quarto ${numero} dispensou limpeza.`, 'sucesso');
-  await carregarQuartos();
-  return;
-}
 
     const resCronometro = await fetch('/cronometro/iniciar', {
       method: 'POST',
@@ -726,61 +704,44 @@
       })
     });
 
-    // resto da sua função continua aqui...
-  } catch (erro) {
-    mostrarMensagem(erro.message || 'Erro ao registrar tarefa.', 'erro');
+    const retornoCronometro = await resCronometro.json();
+
+    if (!resCronometro.ok) {
+      mostrarMensagem(retornoCronometro.error || 'Não foi possível iniciar.', 'erro');
+      return;
+    }
+
+    const detalhes = tipo === 'troca_enxoval'
+      ? 'Troca programada de enxoval'
+      : tipo === 'checkout'
+      ? 'Limpeza geral com troca total de enxoval'
+      : 'Troca de piso';
+
+    const resRegistro = await fetch('/limpeza-quarto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quarto_numero: numero,
+        camareira_nome: nomeCamareira,
+        tipo_servico: tipo,
+        detalhes_enxoval: detalhes,
+        data: hoje
+      })
+    });
+
+    const retornoRegistro = await resRegistro.json();
+
+    if (!resRegistro.ok) {
+      mostrarMensagem(retornoRegistro.error || 'Falha ao registrar tarefa.', 'erro');
+      return;
+    }
+
+    mostrarMensagem(`Tarefa iniciada no apto ${numero}`);
+    carregarTudo();
+  } catch (err) {
+    mostrarMensagem('Erro ao registrar tarefa.', 'erro');
   }
 }
-
-      try {
-        const resCronometro = await fetch('/cronometro/iniciar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            quarto_numero: numero,
-            camareira: nomeCamareira,
-            tipo_servico: tipo
-          })
-        });
-
-        const retornoCronometro = await resCronometro.json();
-
-        if (!resCronometro.ok) {
-          mostrarMensagem(retornoCronometro.error || 'Não foi possível iniciar.', 'erro');
-          return;
-        }
-
-        const detalhes = tipo === 'troca_enxoval'
-          ? 'Troca programada de enxoval'
-          : tipo === 'checkout'
-          ? 'Limpeza geral com troca total de enxoval'
-          : 'Troca de piso';
-
-        const resRegistro = await fetch('/limpeza-quarto', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            quarto_numero: numero,
-            camareira_nome: nomeCamareira,
-            tipo_servico: tipo,
-            detalhes_enxoval: detalhes,
-            data: hoje
-          })
-        });
-
-        const retornoRegistro = await resRegistro.json();
-
-        if (!resRegistro.ok) {
-          mostrarMensagem(retornoRegistro.error || 'Falha ao registrar tarefa.', 'erro');
-          return;
-        }
-
-        mostrarMensagem(`Tarefa iniciada no apto ${numero}`);
-        carregarTudo();
-      } catch (err) {
-        mostrarMensagem('Erro ao registrar tarefa.', 'erro');
-      }
-    }
 
    async function pausarLimpeza(id) {
       try {
