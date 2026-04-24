@@ -309,7 +309,7 @@ app.get('/atividades-hoje', (req, res) => {
     `SELECT quarto_numero, camareira_nome, tipo_servico, data
      FROM limpezas_quartos
      WHERE data = ?
-     ORDER BY rowid ASC`,
+     ORDER BY rowid DESC`,
     [hoje],
     (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
