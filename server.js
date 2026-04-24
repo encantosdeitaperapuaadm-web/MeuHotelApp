@@ -302,5 +302,21 @@ app.post('/cronometro/retomar/:id', (req, res) => {
   });
 });
 
+// ==================== ATIVIDADES DO DIA ====================
+app.get('/atividades-hoje', (req, res) => {
+  const hoje = new Date().toISOString().slice(0, 10);
+  db.all(
+    `SELECT quarto_numero, camareira_nome, tipo_servico, timestamp
+     FROM limpezas_quartos
+     WHERE data = ?
+     ORDER BY timestamp ASC`,
+    [hoje],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
+});
+
 io.on('connection', (socket) => { console.log('Cliente conectado'); });
 server.listen(3000, () => { console.log('Servidor rodando em http://localhost:3000'); });
