@@ -306,10 +306,10 @@ app.post('/cronometro/retomar/:id', (req, res) => {
 app.get('/atividades-hoje', (req, res) => {
   const hoje = new Date().toISOString().slice(0, 10);
   db.all(
-    `SELECT quarto_numero, camareira_nome, tipo_servico, timestamp
+    `SELECT quarto_numero, camareira_nome, tipo_servico, data
      FROM limpezas_quartos
      WHERE data = ?
-     ORDER BY timestamp ASC`,
+     ORDER BY rowid ASC`,
     [hoje],
     (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
