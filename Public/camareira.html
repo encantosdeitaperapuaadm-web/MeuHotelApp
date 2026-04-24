@@ -659,10 +659,26 @@
     container.innerHTML = html;
   }
 
+    function obterNomeTarefa(tipo) {
+      const mapa = {
+        arrumacao: 'Limpeza',
+        troca_enxoval: 'Troca de enxoval',
+        checkout: 'Check-out',
+        dispensa: 'Dispensa'
+      };
+      return mapa[tipo] || tipo;
+    }
+
     async function registrarTarefa(numero, tipo, descricao) {
     if (!nomeCamareira) {
       mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
       return;
+    }
+
+    const nomes = { arrumacao: 'Limpeza', troca_enxoval: 'Troca de enxoval', checkout: 'Check-out', dispensa: 'Dispensa' };
+    const nomeTarefa = nomes[tipo] || tipo;
+    if (tipo === 'checkout' || tipo === 'dispensa') {
+      if (!confirm(`Confirmar "${nomeTarefa}" no quarto ${String(numero).padStart(2, '0')}?`)) return;
     }
 
   const hoje = new Date().toISOString().slice(0, 10);
