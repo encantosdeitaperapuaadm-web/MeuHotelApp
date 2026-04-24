@@ -38,6 +38,7 @@
         <div class="tab active" onclick="showTab('mapa')">Mapa</div>
         <div class="tab" onclick="showTab('import')">Importar</div>
         <div class="tab" onclick="showTab('manut')">Manutenção</div>
+        <div class="tab" onclick="showTab('atividades')">📋 Hoje</div>
     </div>
 
     <div id="tab-mapa" class="content">
@@ -63,10 +64,16 @@
             <textarea id="manut-obs" placeholder="Descreva o problema..."></textarea>
             <button class="btn btn-blue" onclick="saveManut()">Registrar Chamado</button>
         </div>
+
         <div class="card">
             <h2>Chamados Abertos</h2>
             <div id="lista-manut"></div>
+        <div id="tab-atividades" class="content" style="display:none;">
+        <div class="card">
+            <h2>📋 Atividades do dia</h2>
+            <div id="lista-atividades">Carregando...</div>
         </div>
+            </div>
     </div>
 
     <!-- Modal Ações Quarto -->
@@ -201,8 +208,47 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tab).style.display = 'block';
             event.target.classList.add('active');
+            if (tab === 'atividades') loadAtividades();
             if(tab === 'manut') loadManut();
         }
+
+        async function loadAtividades() {
+  const res = await fetch('/atividades-hoje');
+  const dados = await res.json();
+  const container = document.getElementById('lista-atividades');
+
+  if (!dados.length) {
+    container.innerHTML = '<p style="color:#888">Nenhuma atividade registrada hoje.</p>';
+    return;
+  }
+
+  const icones = {
+    arrumacao: '🧹',
+    troca_enxoval: '🛏️',
+    checkout: '🚪',
+    dispensa: '🙅'
+  };
+
+  const nomes = {
+    arrumacao: 'Limpeza',
+    troca_enxoval: 'Troca de enxoval',
+    checkout: 'Check-out',
+    dispensa: 'Dispensa'
+  };
+
+  container.innerHTML = dados.map(d => {
+    const hora = new Date(d.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const icone = icones[d.tipo_servico] || '📌';
+    const nome = nomes[d.tipo_servico] || d.tipo_servico;
+    return `
+      <div style="padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px;">
+        ${icone} <strong>Quarto ${String(d.quarto_numero).padStart(2,'0')}</strong>
+        — ${nome}
+        <span style="color:#888; float:right;">${hora} · ${d.camareira_nome}</span>
+      </div>
+    `;
+  }).join('');
+}
 
         socket.on('update', () => loadQuartos());
         loadQuartos();
