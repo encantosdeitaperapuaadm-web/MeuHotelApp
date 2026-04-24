@@ -652,6 +652,14 @@
   }
 
     async function registrarTarefa(numero, tipo, descricao) {
+      if (!nomeCamareira) {
+        mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
+        return;
+      }
+
+      const hoje = new Date().toISOString().slice(0, 10);
+
+      async function registrarTarefa(numero, tipo, descricao) {
   if (!nomeCamareira) {
     mostrarMensagem('Camareira não identificada. Volte ao login.', 'erro');
     return;
@@ -661,15 +669,15 @@
 
   try {
     if (tipo === 'dispensa') {
-      const resDispensa = await fetch('/limpeza-quarto', {
+      const resDispensa = await fetch('/tarefas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quarto_numero: numero,
-          camareira_nome: nomeCamareira,
-          tipo_servico: 'dispensa',
-          detalhes_enxoval: descricao || 'Hóspede dispensou limpeza',
-          data: hoje
+          camareira: nomeCamareira,
+          data: hoje,
+          tipo: 'dispensa_limpeza',
+          descricao: descricao || 'Hóspede dispensou limpeza'
         })
       });
 
@@ -684,6 +692,30 @@
       return;
     }
 
+    if (tipo === 'dispensa') {
+  const resDispensa = await fetch('/limpeza-quarto', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      quarto_numero: numero,
+      camareira_nome: nomeCamareira,
+      tipo_servico: 'dispensa',
+      detalhes_enxoval: descricao || 'Hóspede dispensou limpeza',
+      data: hoje
+    })
+  });
+
+  const dataDispensa = await resDispensa.json();
+
+  if (!resDispensa.ok) {
+    throw new Error(dataDispensa.error || 'Erro ao registrar dispensa de limpeza.');
+  }
+
+  mostrarMensagem(`Quarto ${numero} dispensou limpeza.`, 'sucesso');
+  await carregarQuartos();
+  return;
+}
+
     const resCronometro = await fetch('/cronometro/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -693,19 +725,6 @@
         tipo_servico: tipo
       })
     });
-
-    const dataCronometro = await resCronometro.json();
-
-    if (!resCronometro.ok) {
-      throw new Error(dataCronometro.error || 'Erro ao iniciar cronômetro.');
-    }
-
-    mostrarMensagem(`Tarefa iniciada no quarto ${numero}.`, 'sucesso');
-    await carregarQuartos();
-  } catch (erro) {
-    mostrarMensagem(erro.message || 'Erro ao registrar tarefa.', 'erro');
-  }
-}
 
     // resto da sua função continua aqui...
   } catch (erro) {
