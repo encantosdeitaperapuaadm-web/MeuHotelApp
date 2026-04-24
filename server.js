@@ -233,6 +233,8 @@ app.get('/cronometro/andamento', (req, res) => {
       camareira,
       tipo_servico,
       inicio,
+      inicio_pausa,
+      COALESCE(tempo_pausa_segundos, 0) AS tempo_pausa_segundos,
       COALESCE(status, 'em_andamento') AS status,
       CASE
         WHEN COALESCE(status, 'em_andamento') = 'pausado' THEN COALESCE(segundos_decorridos, 0)
