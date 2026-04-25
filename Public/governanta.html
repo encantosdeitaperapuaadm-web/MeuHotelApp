@@ -295,6 +295,8 @@ function aplicarFiltroGov(status, botao) {
 
 function renderizarQuartosGov() {
   const container = document.getElementById('lista-alas-gov');
+  console.log('renderizarQuartosGov chamou');
+  console.log('quartos:', quartos);
   const alas = alaAtual === 'todas'
     ? ['Bloco A - Térreo', 'Bloco A - 1º Andar', 'Bloco B']
     : [alaAtual];
@@ -355,6 +357,7 @@ function renderizarQuartosGov() {
   });
 
   if (!html) html = `<div class="vazio">Nenhum quarto encontrado.</div>`;
+  console.log('html final:', html);
   container.innerHTML = html;
 }
 
