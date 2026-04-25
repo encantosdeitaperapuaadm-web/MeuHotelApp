@@ -6,16 +6,18 @@
   <title>Governanta - Hotel Encantos</title>
   <style>
     .filtro-btn-gov {
-      padding: 8px 14px;
-      border: 2px solid #6b4c1a;
-      border-radius: 20px;
+      padding: 5px 8px;
+      border: 1px solid #6b4c1a;
+      border-radius: 10px;
       background: white;
       color: #6b4c1a;
-      font-weight: bold;
-      font-size: 12px;
+      font-weight: 700;
+      font-size: 11px;
       cursor: pointer;
       transition: 0.2s;
+      white-space: nowrap;
     }
+
     .filtro-btn-gov.ativo {
       background: #6b4c1a;
       color: white;
@@ -132,7 +134,7 @@
 
   <section class="controles">
     <div class="ala-box">
-      abel for="select-ala-gov">Ala</label>
+      <label for="select-ala-gov">Ala</label>
       <select id="select-ala-gov" onchange="alterarAlaGov()">
         <option value="todas">Todas as alas</option>
         <option value="Bloco A - Térreo">Bloco A - Térreo</option>
@@ -142,10 +144,10 @@
     </div>
     <div class="filtros">
       <button class="filtro-btn-gov ativo" onclick="aplicarFiltroGov('todos', this)">Todos</button>
-      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('ocupado', this)">Ocupados</button>
-      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('em_limpeza', this)">Limpando</button>
-      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('disponivel', this)">Disponíveis</button>
-      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('interditado', this)">Interditados</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('ocupado', this)">Ocup.</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('em_limpeza', this)">Limp.</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('disponivel', this)">Disp.</button>
+      <button class="filtro-btn-gov" onclick="aplicarFiltroGov('interditado', this)">Interd.</button>
     </div>
   </section>
 
