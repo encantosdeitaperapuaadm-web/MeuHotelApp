@@ -494,15 +494,18 @@ function renderizarQuartosGov() {
       const tempoBase = Number(cron?.segundos_decorridos || 0);
 const inicioMs = cron && cron.inicio ? Date.parse(cron.inicio) : null;
 
+const tempoBase = Number((cron && cron.segundos_decorridos) || 0);
+const inicioMs = (cron && cron.inicio) ? Date.parse(cron.inicio) : 0;
+
 const tempoHtml = emAndamento
-  ? `<div class="tempo-box ${cron.status === 'pausado' ? 'pausado' : 'ativo'}"
-         data-cron-id="${cron.id}"
-         data-status="${cron.status}"
-         data-segundos="${tempoBase}"
-         data-inicio="${inicioMs || ''}">
-      ⏱️ ${cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} •
-      <span class="tempo-valor">${formatarTempo(tempoBase)}</span>
-    </div>`
+  ? `<div class="tempo-box ${cron && cron.status === 'pausado' ? 'pausado' : 'ativo'}"
+        data-cron-id="${cron ? cron.id : ''}"
+        data-status="${cron ? cron.status : ''}"
+        data-segundos="${tempoBase}"
+        data-inicio="${inicioMs}">
+        ⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} •
+        <span class="tempo-valor">${formatarTempo(tempoBase)}</span>
+     </div>`
   : '';
 
       const botoesHtml = emAndamento ? `
@@ -1135,25 +1138,24 @@ function atualizarTemposAoVivoGov() {
   const boxes = document.querySelectorAll('.tempo-box[data-cron-id]');
 
   boxes.forEach(box => {
-    const status = box.dataset.status;
     const tempoSpan = box.querySelector('.tempo-valor');
     if (!tempoSpan) return;
 
+    const status = box.dataset.status || '';
     const segundosBase = parseInt(box.dataset.segundos || '0', 10);
+    const inicioMs = parseInt(box.dataset.inicio || '0', 10);
 
     if (status === 'pausado') {
       tempoSpan.textContent = formatarTempo(segundosBase);
       return;
     }
 
-    const inicioMs = parseInt(box.dataset.inicio || '0', 10);
     if (!inicioMs) {
       tempoSpan.textContent = formatarTempo(segundosBase);
       return;
     }
 
-    const agora = Date.now();
-    const segundosAoVivo = segundosBase + Math.floor((agora - inicioMs) / 1000);
+    const segundosAoVivo = segundosBase + Math.floor((Date.now() - inicioMs) / 1000);
     tempoSpan.textContent = formatarTempo(segundosAoVivo);
   });
 }
