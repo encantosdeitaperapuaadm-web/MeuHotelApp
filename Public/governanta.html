@@ -491,21 +491,21 @@ function renderizarQuartosGov() {
       let statusVisual = q.status;
       if (cron && cron.status === 'pausado') statusVisual = 'pausado';
 
-      const tempoBase = Number(cron?.segundos_decorridos || 0);
-const inicioMs = cron && cron.inicio ? Date.parse(cron.inicio) : null;
-
+      
 const tempoBase = Number((cron && cron.segundos_decorridos) || 0);
 const inicioMs = (cron && cron.inicio) ? Date.parse(cron.inicio) : 0;
 
 const tempoHtml = emAndamento
-  ? `<div class="tempo-box ${cron && cron.status === 'pausado' ? 'pausado' : 'ativo'}"
-        data-cron-id="${cron ? cron.id : ''}"
-        data-status="${cron ? cron.status : ''}"
-        data-segundos="${tempoBase}"
-        data-inicio="${inicioMs}">
-        ⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} •
-        <span class="tempo-valor">${formatarTempo(tempoBase)}</span>
-     </div>`
+  ? `
+    <div class="tempo-box ${cron && cron.status === 'pausado' ? 'pausado' : 'ativo'}"
+         data-cron-id="${cron ? cron.id : ''}"
+         data-status="${cron ? cron.status : ''}"
+         data-segundos="${tempoBase}"
+         data-inicio="${inicioMs}">
+      <span>⏱️ ${cron && cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} • </span>
+      <span class="tempo-valor">${formatarTempo(tempoBase)}</span>
+    </div>
+  `
   : '';
 
       const botoesHtml = emAndamento ? `
@@ -595,10 +595,28 @@ async function retomarLimpezaGov(id) {
 }
 
 async function finalizarLimpezaGov(id, numero) {
-  if (!confirm(`Finalizar limpeza do quarto ${String(numero).padStart(2,'0')}?`)) return;
-  await fetch(`/cronometro/finalizar/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quarto_numero: numero }) });
-  mostrarMensagem(`Quarto ${numero} finalizado!`);
-  await carregarTudoGov();
+  if (!confirm(`Finalizar limpeza do quarto ${String(numero).padStart(2, '0')}?`)) return;
+
+  try {
+    const res = await fetch(`/cronometro/finalizar/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quarto_numero: numero })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      mostrarMensagem(data.error || 'Erro ao finalizar limpeza.', 'erro');
+      return;
+    }
+
+    mostrarMensagem(`Quarto ${numero} finalizado!`);
+    await carregarTudoGov();
+  } catch (err) {
+    console.error(err);
+    mostrarMensagem('Erro de conexão ao finalizar limpeza.', 'erro');
+  }
 }
 
 async function carregarTudoGov() {
