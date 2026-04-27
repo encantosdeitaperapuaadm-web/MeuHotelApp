@@ -409,6 +409,7 @@ const checklists = {
   ]
 };
 
+const nomeGov = localStorage.getItem('nomeCamareira') || 'Vanessa';
 let quartos = [];
 let cronometros = [];
 let alaAtual = 'todas';
@@ -1105,7 +1106,9 @@ function mostrarAba(aba) {
 }
 
 carregarQuartos();
-carregarTudoGov();
+setInterval(() => {
+  carregarTudoGov();
+}, 5000);
 setTimeout(() => verificarCronometroAtivo(), 500);
 
 document.addEventListener('visibilitychange', () => {
