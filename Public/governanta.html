@@ -491,9 +491,19 @@ function renderizarQuartosGov() {
       let statusVisual = q.status;
       if (cron && cron.status === 'pausado') statusVisual = 'pausado';
 
-      const tempoHtml = emAndamento
-        ? `<div class="tempo-box">⏱️ ${cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} • ${formatarTempo(cron.segundos_decorridos || 0)}</div>`
-        : '';
+      const tempoBase = Number(cron?.segundos_decorridos || 0);
+const inicioMs = cron && cron.inicio ? Date.parse(cron.inicio) : null;
+
+const tempoHtml = emAndamento
+  ? `<div class="tempo-box ${cron.status === 'pausado' ? 'pausado' : 'ativo'}"
+         data-cron-id="${cron.id}"
+         data-status="${cron.status}"
+         data-segundos="${tempoBase}"
+         data-inicio="${inicioMs || ''}">
+      ⏱️ ${cron.status === 'pausado' ? 'Pausado' : 'Em andamento'} •
+      <span class="tempo-valor">${formatarTempo(tempoBase)}</span>
+    </div>`
+  : '';
 
       const botoesHtml = emAndamento ? `
         <div class="tarefas">
@@ -1120,6 +1130,37 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('focus', () => {
   setTimeout(() => verificarCronometroAtivo(), 300);
 });
+
+function atualizarTemposAoVivoGov() {
+  const boxes = document.querySelectorAll('.tempo-box[data-cron-id]');
+
+  boxes.forEach(box => {
+    const status = box.dataset.status;
+    const tempoSpan = box.querySelector('.tempo-valor');
+    if (!tempoSpan) return;
+
+    const segundosBase = parseInt(box.dataset.segundos || '0', 10);
+
+    if (status === 'pausado') {
+      tempoSpan.textContent = formatarTempo(segundosBase);
+      return;
+    }
+
+    const inicioMs = parseInt(box.dataset.inicio || '0', 10);
+    if (!inicioMs) {
+      tempoSpan.textContent = formatarTempo(segundosBase);
+      return;
+    }
+
+    const agora = Date.now();
+    const segundosAoVivo = segundosBase + Math.floor((agora - inicioMs) / 1000);
+    tempoSpan.textContent = formatarTempo(segundosAoVivo);
+  });
+}
+
+setInterval(() => {
+  atualizarTemposAoVivoGov();
+}, 1000);
 
 setInterval(async () => {
   if (cronometroAtivo && !pausado) {
