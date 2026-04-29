@@ -597,24 +597,30 @@ async function retomarLimpezaGov(id) {
 async function finalizarLimpezaGov(id, numero) {
   if (!confirm(`Finalizar limpeza do quarto ${String(numero).padStart(2, '0')}?`)) return;
 
-  const res = await fetch('/cronometro/finalizar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: id,
-      quarto_numero: numero
-    })
-  });
+  try {
+    const res = await fetch('/cronometro/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: Number(id),
+        quarto_numero: Number(numero)
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
-  if (!res.ok) {
-    mostrarMensagem(data.error || 'Erro ao finalizar limpeza.', 'erro');
-    return;
+    if (!res.ok) {
+      mostrarMensagem(data.error || 'Erro ao finalizar limpeza.', 'erro');
+      return;
+    }
+
+    mostrarMensagem(`Quarto ${String(numero).padStart(2, '0')} finalizado!`);
+    await carregarTudoGov();
+    await carregarQuartos();
+  } catch (e) {
+    console.error(e);
+    mostrarMensagem('Erro de conexão ao finalizar limpeza.', 'erro');
   }
-
-  mostrarMensagem(`Quarto ${numero} finalizado!`);
-  await carregarTudoGov();
 }
 
 async function carregarTudoGov() {
